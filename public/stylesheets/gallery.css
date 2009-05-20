@@ -11,7 +11,7 @@ div.gallery_shower {
   height: 500px;
   overflow: hidden;
   text-align: center;
-  background: white url(/images/admin/spinner.gif) no-repeat center center;
+  background: url(/images/admin/spinner.gif) no-repeat center center;
 }
 
 div.gallery_caption{

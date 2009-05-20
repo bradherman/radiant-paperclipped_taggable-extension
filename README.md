@@ -23,14 +23,16 @@ Brand new but most of the code is well broken-in and has survived in production 
 
 As usual:
 
-	git submodule add git://github.com/spanner/radiant-paperclipped_taggable-extension.git vendor/extensions/taggable
+	git submodule add git://github.com/spanner/radiant-paperclipped_taggable-extension.git vendor/extensions/paperclipped_taggable
 	rake radiant:extensions:paperclipped_taggable:update
 	
 ## Configuration
 
-You probably want to make sure that paperclipped and taggable load before this does. Multi_site too, if you're using that. This is the sequence I have to use:
+You need to make sure that paperclipped and taggable load before this does. Multi_site too, if you're using that. This is the sequence I have to use:
 
 	config.extensions = [ :share_layouts, :multi_site, :taggable, :reader, :reader_group, :paperclipped, :all ]
+	
+This will probably need to be set before can you run the update task.
   
 ## Examples
 

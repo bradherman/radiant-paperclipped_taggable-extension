@@ -214,7 +214,7 @@ var GalleryItem = new Class({
     return this.page.itemAfter(this);
   },
   highlightMe: function () {
-    this.borderFX.start('#868e8d');
+    this.borderFX.start('#BB0129');
   },
   unHighlightMe: function () {
     this.borderFX.start('#ffffff');

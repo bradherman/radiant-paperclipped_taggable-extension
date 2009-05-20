@@ -1,0 +1,182 @@
+/******** gallery ********/
+
+div.gallery {
+/*  border: 1px solid red;*/
+  width: 800px;
+}
+
+div.gallery_shower {
+  position: relative;
+  width: 800px;
+  height: 500px;
+  overflow: hidden;
+  text-align: center;
+  background: white url(/images/admin/spinner.gif) no-repeat center center;
+}
+
+div.gallery_caption{
+  font-family: HelveticaNeue-Roman, helvetica, arial, sans-serif;
+  font-size: 0.8em;
+  line-height: 1.1;
+  padding: 5px;
+  color:#868e8d;
+  text-align: center;
+  height: 32px;
+  overflow: hidden;
+}
+
+div.gallery_wrapper{
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  width: 614px;
+  float: left;
+  height: 204px;
+}
+
+div.gallery_slider{
+  position: relative;
+  width: 10000px;
+  height: 204px;
+  overflow: hidden;
+}
+
+ul.gallery_page{
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  letter-spacing: 0;
+  width: 616px;
+  height: 204px;
+  float: left;
+}
+ul.gallery_page li {
+  float:left;
+  list-style:none;
+  margin: 0;
+  padding: 0;
+  width:68px;
+  height:68px;
+}
+ul.gallery_page img.gallery_thumb {
+  width:64px;
+  height:64px;
+  margin: 0;
+  border: 2px solid white;
+  padding:0;
+}
+ul.gallery_page img.previewed {
+  border: 2px solid #868e8d;
+}
+ul.gallery_page p, ul.gallery_page span {
+  display:none;
+}
+ul.gallery_page a.gallery_download {
+  display: none;
+}
+a.gallery_left, a.gallery_right{
+  display: block;
+  float: left;
+  width: 30px;
+  height: 204px;
+/*  text-indent: -40px;*/
+  text-decoration: none;
+/*  z-index: 1000; */
+  color: white;
+  background-color: red;
+  overflow: hidden;
+}
+
+/*a.gallery_left {
+  margin: 2px 4px 2px 0;
+  background: white url(/images/gallery/dim_left.png) no-repeat center 20px;
+}
+
+a.gallery_left:hover {
+  background: white url(/images/gallery/simple_left.png) no-repeat center 20px;
+}
+
+a.left_end {
+  background: white url(/images/gallery/dim_far_right.png) no-repeat center 20px;
+}
+a.left_end:hover {
+  background: white url(/images/gallery/far_right.png) no-repeat center 20px;
+}
+
+a.gallery_right {
+  margin: 2px 0 2px 2px;
+  background: white url(/images/gallery/dim_right.png) no-repeat center 20px;
+}
+
+a.gallery_right:hover {
+  background: white url(/images/gallery/simple_right.png) no-repeat center 20px;
+}
+
+a.right_end {
+  background: white url(/images/gallery/dim_far_left.png) no-repeat center 20px;
+}
+
+a.right_end:hover {
+  background: white url(/images/gallery/far_left.png) no-repeat center 20px;
+}
+*/
+div.gallery_links {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 11000;
+  overflow: hidden;
+  background-color: transparent;
+}
+
+div.gallery_links a {
+  position: relative;
+  display: block;
+  height: 99%;
+  float: left;
+}
+
+div.gallery_links a.item_left {
+  width: 25%;
+  z-index: 11010;
+}
+
+div.gallery_links a.item_left:hover {
+  background: transparent url(/images/gallery/image_left.png) no-repeat left 50px;
+}
+
+div.gallery_links a.item_download {
+  width: 50%;
+  z-index: 11011;
+}
+
+div.gallery_links a.item_download:hover {
+  background: transparent url(/images/gallery/image_down.png) no-repeat center 50px;
+}
+
+div.gallery_links a.item_right {
+  width: 25%;
+  float: right;
+  z-index: 11012;
+}
+
+div.gallery_links a.item_right:hover {
+  background: transparent url(/images/gallery/image_right.png) no-repeat right 50px;
+}
+
+div.gallery_foot {
+  clear: both;
+  height: 30px;
+  text-align: center;
+  font-family: HelveticaNeue-Roman, helvetica, arial, sans-serif;
+  font-size: 0.8em;
+  line-height: 1.1;
+  padding: 5px;
+  color:#999;
+}
+
+/* ie fix */
+
+div.gallery_links, div.gallery_links a { 
+  background: transparent url(/images/gallery/dot.gif) no-repeat left top;  
+}

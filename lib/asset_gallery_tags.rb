@@ -112,7 +112,7 @@ module AssetGalleryTags
     Presents a standard marginal gallery block suitable for turning unobtrusively into a rollover or lightbox gallery. 
     We need to be able to work out a collection of assets: that can be defined already (eg by assets:each) or come from a page or tag or from one or more tags.
     If no tags are found, nothing is displayed.
-    Default preview size is 'illustration' and thumbnail size 'thumbnail' but you can specify any standard asset sizes.
+    Default preview size is 'large' and thumbnail size 'thumbnail' but you can specify any standard asset sizes.
     
     *Usage:*
     <pre><code>
@@ -130,7 +130,7 @@ module AssetGalleryTags
       assets ||= tag.locals.tag.assets.images if tag.locals.tag
     end
     unless assets.empty?
-      size = tag.attr['size'] || 'illustration'
+      size = tag.attr['size'] || 'large'
       thumbsize = tag.attr['thumbnail_size'] || 'thumbnail'
       result = ""
       result << %{<div class="illustration">}
@@ -153,6 +153,8 @@ module AssetGalleryTags
     
     The gallery is quite bare: it's designed to be smartened up and turned into a paginated pick-and-show player using either the supplied javascript or (for those who don't like mootools) something like it.
 
+    Default preview size is 'large' and thumbnail size 'icon' but you can specify any standard asset sizes.
+
     *Usage:*
     <pre><code>
     <r:assets:gallery [size="..."] [thumbnail_size="..."] [download_size="..."] [no_download="false"] [tags="one,or,more,tags"] [thumbnails_per_page="33"] [help="something explananatory"] />
@@ -171,7 +173,7 @@ module AssetGalleryTags
       assets ||= tag.locals.tag.assets.images if tag.locals.tag
     end
     if assets
-      size = options[:size] || 'illustration'
+      size = options[:size] || 'large'
       thumbsize = options[:thumbnail_size] || 'icon'
       dlsize = options[:download_size] || 'original'
       per_slide = options[:thumbnails_per_page] || 33
@@ -179,7 +181,7 @@ module AssetGalleryTags
       tag.locals.asset = assets.first
       result << %{
 <div class="gallery">
-  <div class="gallery_shower gallery_waiting">#{tag.render('assets:image', 'size' => size)}</div>
+  <div class="gallery_shower gallery_waiting"></div>
 	<div class="gallery_caption">#{tag.render('assets:caption')}</div>
 	<a class="gallery_left" href="#">&lt;</a>
 	<div class="gallery_wrapper">
@@ -191,10 +193,9 @@ module AssetGalleryTags
         result << %{
         <li class="gallery_item" id="asset_#{asset.id}">
           <a class="gallery_preview" href="#{tag.render('assets:url', 'size' => size)}">
-            <span>#{tag.render('assets:caption')}</span>
             <img class="gallery_thumb" alt="#{tag.locals.asset.title} thumbnail" src="#{tag.render('assets:url', 'size' => thumbsize)}"/>
           </a>
-          <a class="gallery_download" href="#{tag.render('assets:url', 'size' => dlsize)}">download full-size</a>
+          <a class="gallery_download" title="download" href="#{tag.render('assets:url', 'size' => dlsize)}">#{tag.locals.asset.caption}</a>
         </li>}
         counter += 1
         result << %{</ul><ul class="gallery_page">} if counter % per_slide == 0 && asset != assets.last

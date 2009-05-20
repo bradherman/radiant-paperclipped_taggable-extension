@@ -32,9 +32,20 @@ You probably want to make sure that paperclipped and taggable load before this d
 
 	config.extensions = [ :share_layouts, :multi_site, :taggable, :reader, :reader_group, :paperclipped, :all ]
   
-## Usage
+## Examples
 
-	<r:assets:all>
+There are galleries (with sample css and javascript):
+
+	<r:gallery tags="2009,special" match_all="true" />		#-> large gallery of all images having both tags
+
+	<r:minigallery />                   					#-> small rollover gallery of all images attached to current page.
+	
+And general-purpose archive tags to match those for pages:
+
+	<r:assets:tags:each><li><r:tag:title /></li></r:assets:tags:each>
+	<r:assets:related><r:thumbnail /></r:assets:related>
+
+See the tag documentation for details. 
 
 ## Author and copyright
 

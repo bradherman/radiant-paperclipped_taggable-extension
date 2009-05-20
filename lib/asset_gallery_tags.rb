@@ -6,6 +6,28 @@ module AssetGalleryTags
   # asset-tagging
   
   desc %{
+    Prepares a collection of all the assets attached to the current page.  
+    Other options exactly as for r:assets:each.
+    This isn't much use except for gallery tags.
+    It would make more sense to put this in r:assets but paperclipped uses that space for single-asset tags as well as collections.
+  }    
+  tag "assets:all" do |tag|
+    tag.locals.assets ||= tag.locals.page.assets
+    tag.expand
+  end
+  
+  %w(movie audio image other playable).each do |type|
+    desc %{
+      Prepares a collection of all the #{type} assets attached to the current page.  
+      Other options exactly as for r:assets:each.
+    }    
+    tag "assets:all_#{type}" do |tag|
+      tag.locals.assets ||= tag.locals.page.assets.send(type.pluralize.intern).find(:all, assets_find_options(tag))
+      tag.expand
+    end
+  end
+  
+  desc %{
     Cycles through all tags attached to present asset.
     Takes the same sort and order parameters as children:each.
     Assets is plural for consistency with other paperclipped tags: 

@@ -1,7 +1,6 @@
 # Paperclipped Taggable
 
-In most cases this is just a quick and clean way to get reasonably shiny image galleries on your site, but its real job is to support proper image, media and document archiving and retrieval. The galleries are just a way of playing back the archive, and you can drop any set of assets into a gallery format using the supplied tags:
-
+In most cases this is just a quick and clean way to get reasonably shiny image galleries on your site, but its real job is to support proper image, media and document archiving and retrieval. The galleries are just a way of playing back the archive, and you can drop any set of assets into a gallery format using the supplied tags.
 
 ## How
 
@@ -9,7 +8,7 @@ This extension applies our taggable mechanism to paperclipped assets and extends
 
 For compatibility with the way pages work, it defines a keywords accessor in Asset and puts a keywords field in the edit view.
 
-There's only a line of code and a couple of partials here: for the mechanism, see `taggable/lib/taggable_model.rb`.
+There's only a line of code and a couple of partials here: for the mechanism, see `lib/taggable_model.rb` in the [taggable](https://github.com/spanner/radiant-taggable-extension/tree) extension.
 
 ## Status 
 
@@ -18,7 +17,7 @@ Brand new but most of the code is well broken-in and has survived in production 
 ## Requirements
 
 * Radiant 0.7.x.
-* paperclipped and taggable extensions
+* [paperclipped](https://github.com/spanner/paperclipped) (currently you need our fork) and [taggable](https://github.com/spanner/radiant-taggable-extension) extensions
 
 ## Installation
 
@@ -29,11 +28,13 @@ As usual:
 	
 ## Configuration
 
-You probably want to make sure that paperclipped and taggable load before this does. Multi_site too, if you're using that.
-	
+You probably want to make sure that paperclipped and taggable load before this does. Multi_site too, if you're using that. This is the sequence I have to use:
+
+	config.extensions = [ :share_layouts, :multi_site, :taggable, :reader, :reader_group, :paperclipped, :all ]
+  
 ## Usage
 
-...
+	<r:assets:all>
 
 ## Author and copyright
 

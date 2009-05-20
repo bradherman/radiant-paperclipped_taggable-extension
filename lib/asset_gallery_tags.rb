@@ -176,7 +176,7 @@ module AssetGalleryTags
       size = options[:size] || 'large'
       thumbsize = options[:thumbnail_size] || 'icon'
       dlsize = options[:download_size] || 'original'
-      per_slide = options[:thumbnails_per_page] || 33
+      per_slide = (options[:thumbnails_per_page] || 33).to_i
       help_text = options[:help] || "Click on a thumbnail to preview that image, and on a preview image to download the full-size version."
       tag.locals.asset = assets.first
       result << %{

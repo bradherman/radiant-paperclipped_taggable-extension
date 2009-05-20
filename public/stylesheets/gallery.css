@@ -83,11 +83,11 @@ a.gallery_left, a.gallery_right{
   text-decoration: none;
 /*  z-index: 1000; */
   color: white;
-  background-color: red;
+/*  background-color: red;*/
   overflow: hidden;
 }
 
-/*a.gallery_left {
+a.gallery_left {
   margin: 2px 4px 2px 0;
   background: white url(/images/gallery/dim_left.png) no-repeat center 20px;
 }
@@ -119,7 +119,7 @@ a.right_end {
 a.right_end:hover {
   background: white url(/images/gallery/far_left.png) no-repeat center 20px;
 }
-*/
+
 div.gallery_links {
   position: absolute;
   top: 0;

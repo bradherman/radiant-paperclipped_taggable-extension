@@ -8,7 +8,7 @@ div.gallery {
 div.gallery_shower {
   position: relative;
   width: 682px;
-  height: 500px;
+  height: 600px;
   overflow: hidden;
   text-align: center;
   background: url(/images/admin/spinner.gif) no-repeat center center;
@@ -142,7 +142,7 @@ div.gallery_links a.item_left {
 }
 
 div.gallery_links a.item_left:hover {
-  background: transparent url(/images/gallery/image_left.png) no-repeat left 50px;
+  background: transparent url(/images/gallery/image_left.png) no-repeat left center;
 }
 
 div.gallery_links a.item_download {
@@ -151,7 +151,7 @@ div.gallery_links a.item_download {
 }
 
 div.gallery_links a.item_download:hover {
-  background: transparent url(/images/gallery/image_down.png) no-repeat center 50px;
+  background: transparent url(/images/gallery/image_down.png) no-repeat center center;
 }
 
 div.gallery_links a.item_right {
@@ -161,7 +161,7 @@ div.gallery_links a.item_right {
 }
 
 div.gallery_links a.item_right:hover {
-  background: transparent url(/images/gallery/image_right.png) no-repeat right 50px;
+  background: transparent url(/images/gallery/image_right.png) no-repeat right center;
 }
 
 div.gallery_foot {

@@ -97,7 +97,6 @@ var Gallery = new Class({
     this.current_item.nextItem().showMe();
   },
   showItem: function (item) {     // this should not be called directly. call item.showMe() to hit page and item triggers properly.
-    console.log('showMe:', item.id);
     if (item != this.current_item) {
       this.next_item = item;
       this.hideItem();
@@ -115,6 +114,9 @@ var Gallery = new Class({
   },
   finishShowItem: function () {     // called by onload of next_item preview image in loadAndThen
     this.showing.set('src', this.preloader.get('src'));
+    var padding = (this.shower.getHeight() - this.showing.getHeight())/2;
+    if (padding < 1) padding = 0;
+    this.showing.setStyle('padding-top', Math.floor( padding ));
     this.downloader.set('href', this.next_item.download_url);
     this.main_link.set('href', this.next_item.download_url);
     this.current_item = this.next_item;
@@ -196,7 +198,6 @@ var GalleryItem = new Class({
   },
   showMe: function (e) {
     blockEvent(e);
-    console.log('showMe:', this.id);
     this.page.showItem(this);
   },
   showCaption: function (e) {

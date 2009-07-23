@@ -1,0 +1,8 @@
+- fields_for :asset do |f|
+  #extended-metadata{ :class => "row"}
+    %p.caption{:style => 'width: 47%;'}
+      = f.label :caption
+      = f.text_field :caption, :class => 'textbox', :style => 'width: 100%; font-size: 130%; font-family:Georgia,Palatino,"Times New Roman",Times,serif;'
+    %p.keywords{:style => 'width: 47%;'}
+      = f.label :keywords
+      = f.text_field :keywords, :class => 'textbox', :style => 'width: 100%; font-size: 130%; font-family:Georgia,Palatino,"Times New Roman",Times,serif;'

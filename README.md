@@ -8,18 +8,17 @@ This extension applies our taggable mechanism to paperclipped assets and extends
 
 For compatibility with the way pages work, it defines a keywords accessor in Asset and puts a keywords field in the edit view.
 
-There's only a line of code and a couple of partials here: for the mechanism, see `lib/taggable_model.rb` in the [taggable](https://github.com/spanner/radiant-taggable-extension/tree) extension.
-
 ## Status 
 
-Brand new. Most of the underlying code is well broken-in and has survived in production for a couple of years, but it has all been rearranged and is not yet properly tested. Expect silly mistakes. 
+New but very simple. The work is done in the taggable extension: all we really do here is apply that to assets and add some radius tags for showing galleries.
 
 ## Requirements
 
-* Radiant 0.7.x. It ought to work with 0.8 but I haven't tried yet.
+* Radiant 0.7.x or 0.8.0.
 * [paperclipped](https://github.com/kbingman/paperclipped) and [taggable](https://github.com/spanner/radiant-taggable-extension) extensions
 
-The galleries use mootools, which is included, because I like it better. It's all done unobtrusively - all we put on the page is lists - so you could easily replace it with a slimbox or some other library.
+The galleries use mootools, which is included, because I like it better. 
+It's all done unobtrusively - all we put on the page is lists - so you could easily replace it with a slimbox or some other library.
 
 ## Installation
 

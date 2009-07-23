@@ -235,6 +235,7 @@ module AssetGalleryTags
   private
     
     def _current_assets(tag)
+      logger.warn "_current_assets!"
       if tag.locals.assets
         tag.locals.assets
       elsif tag.attr['tags']

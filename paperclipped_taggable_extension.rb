@@ -4,7 +4,8 @@ class PaperclippedTaggableExtension < Radiant::Extension
   url "http://spanner.org/radiant/paperclipped_taggable"
   
   def activate
-    Asset.send :is_taggable
+    Asset.send :is_taggable                                              # make pages taggable 
+    Asset.send :include, TaggableAsset                                   # and add a keywords method for compatibility with pages
     Page.send :include, AssetGalleryTags
   end
   

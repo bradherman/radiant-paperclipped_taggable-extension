@@ -32,16 +32,14 @@ As usual:
 You need to make sure that paperclipped and taggable load before this does. Multi_site too, if you're using that. This is the sequence I have:
 
 	config.extensions = [ :share_layouts, :multi_site, :taggable, :reader, :reader_group, :paperclipped, :all ]
-	
-This will probably need to be changed in between adding the submodule and running the update task.
   
 ## Examples
 
 There are galleries (with sample css and javascript):
 
-	<r:gallery tags="2009,special" match_all="true" />		#-> large gallery of all images having both tags
+	<r:assets:gallery tags="2009,special" match_all="true" />		#-> large gallery of all images having both tags
 
-	<r:minigallery />                   					#-> small rollover gallery of all images attached to current page.
+	<r:assets:minigallery />                   						#-> small rollover gallery of all images attached to current page.
 	
 And general-purpose archive tags to match those for pages:
 

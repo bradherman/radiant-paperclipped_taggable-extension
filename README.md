@@ -37,9 +37,9 @@ You need to make sure that paperclipped and taggable load before this does. Mult
 
 There are galleries (with sample css and javascript):
 
-	<r:assets:gallery tags="2009,special" match_all="true" />		#-> large gallery of all images having both tags
+	<r:assets:gallery tags="ridiculous,special" match_all="true" />		#-> full-page gallery of all images having both tags
 
-	<r:assets:minigallery />                   						#-> small rollover gallery of all images attached to current page.
+	<r:assets:minigallery />                   							#-> small rollover gallery of all images attached to current page.
 	
 And general-purpose archive tags to match those for pages:
 

@@ -160,7 +160,7 @@ module AssetGalleryTags
 
     *Usage:*
     <pre><code>
-    <r:assets:gallery [size="..."] [thumbnail_size="..."] [download_size="..."] [no_download="false"] [tags="one,or,more,tags"] [thumbnails_per_page="33"] [help="something explananatory"] />
+    <r:assets:gallery [size="..."] [thumbnail_size="..."] [download_size="..."] [no_download="false"] [tags="one,or,more,tags"] [thumbnails_per_page="30"] />
     </code></pre>
   }
   tag 'assets:gallery' do |tag|
@@ -178,19 +178,18 @@ module AssetGalleryTags
       size = options[:size] || 'large'
       thumbsize = options[:thumbnail_size] || 'icon'
       dlsize = options[:download_size] || 'original'
-      per_slide = (options[:thumbnails_per_page] || 33).to_i
-      help_text = options[:help] || "Click on a thumbnail to preview that image, and on a preview image to download the full-size version."
+      per_slide = (options[:thumbnails_per_page] || 30).to_i
       tag.locals.asset = tag.locals.assets.first
       
       result = %{
 <div class="gallery">
   <div class="gallery_shower gallery_waiting"></div>
-	<div class="gallery_caption"></div>
-	<a class="gallery_left" href="#">&lt;</a>
-	<div class="gallery_wrapper">
-	  <div class="gallery_slider">
-		  <ul class="gallery_page">}
-  		counter = 0
+  <div class="gallery_caption"></div>
+  <a class="gallery_left" href="#">&lt;</a>
+  <div class="gallery_wrapper">
+    <div class="gallery_slider">
+      <ul class="gallery_page">}
+      counter = 0
       tag.locals.assets.each do |asset|
         tag.locals.asset = asset
         result << %{
@@ -201,14 +200,16 @@ module AssetGalleryTags
           <a class="gallery_download" title="download" href="#{tag.render('assets:url', 'size' => dlsize)}">#{tag.render('assets:caption')}</a>
         </li>}
         counter += 1
-        result << %{</ul><ul class="gallery_page">} if counter % per_slide == 0 && asset != assets.last
+        result << %{
+      </ul>
+      <ul class="gallery_page">} if counter % per_slide == 0 && asset != assets.last
       end
       result << %{
-		  </ul>
-  	</div>
-	</div>
-	<a class="gallery_right" href="#">&gt;</a>
-  <div class="gallery_foot"><p>#{help_text}</p></div>
+      </ul>
+    </div>
+  </div>
+  <a class="gallery_right" href="#">&gt;</a>
+  <div class="gallery_foot"><p>page 1</p></div>
 </div>}
     end
     result

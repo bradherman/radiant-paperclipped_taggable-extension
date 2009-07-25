@@ -1,24 +1,23 @@
 /******** gallery ********/
 
 div.gallery {
-/*  border: 1px solid red;*/
-  width: 682px;
+  width: 800px;
 }
 
 div.gallery_shower {
   position: relative;
-  width: 682px;
+  width: 800px;
   height: 600px;
   overflow: hidden;
   text-align: center;
-  background: url(/images/admin/spinner.gif) no-repeat center center;
+  background: transparent url(/images/gallery/spinner.gif) no-repeat 50% 25%;
 }
 
 div.gallery_caption{
-  font-family: HelveticaNeue-Light, helvetica, arial, sans-serif;
-  font-size: 1.2em;
+  font-family: HelveticaNeue-Roman, helvetica, arial, sans-serif;
+  font-size: 0.8em;
   line-height: 1.1;
-  padding: 10px;
+  padding: 5px;
   color:#868e8d;
   text-align: center;
   height: 32px;
@@ -29,9 +28,10 @@ div.gallery_wrapper{
   position: relative;
   overflow: hidden;
   padding: 0;
-  width: 616px;
+  width: 690px;
   float: left;
   height: 204px;
+  margin: 0 22px;
 }
 
 div.gallery_slider{
@@ -46,7 +46,7 @@ ul.gallery_page{
   padding: 0;
   list-style: none;
   letter-spacing: 0;
-  width: 616px;
+  width: 690px;
   height: 204px;
   float: left;
 }
@@ -66,7 +66,7 @@ ul.gallery_page img.gallery_thumb {
   padding:0;
 }
 ul.gallery_page img.previewed {
-  border: 2px solid #BB0129;
+  border: 2px solid #d1005d;
 }
 ul.gallery_page p, ul.gallery_page span {
   display:none;
@@ -79,16 +79,16 @@ a.gallery_left, a.gallery_right{
   float: left;
   width: 30px;
   height: 204px;
-/*  text-indent: -40px;*/
+  text-indent: -40px;
   text-decoration: none;
-/*  z-index: 1000; */
+  z-index: 1000; 
   color: white;
-/*  background-color: red;*/
+  background-color: red;
   overflow: hidden;
 }
 
 a.gallery_left {
-  margin: 2px 4px 2px 0;
+  margin: 0;
   background: white url(/images/gallery/dim_left.png) no-repeat center 20px;
 }
 
@@ -104,7 +104,7 @@ a.left_end:hover {
 }
 
 a.gallery_right {
-  margin: 2px 0 2px 2px;
+  margin: 0;
   background: white url(/images/gallery/dim_right.png) no-repeat center 20px;
 }
 
@@ -122,6 +122,8 @@ a.right_end:hover {
 
 div.gallery_links {
   position: absolute;
+  width: 800px;
+  height: 600px;
   top: 0;
   left: 0;
   z-index: 11000;
@@ -142,7 +144,7 @@ div.gallery_links a.item_left {
 }
 
 div.gallery_links a.item_left:hover {
-  background: transparent url(/images/gallery/image_left.png) no-repeat left center;
+  background: transparent url(/images/gallery/image_left.png) no-repeat left 50px;
 }
 
 div.gallery_links a.item_download {
@@ -151,7 +153,7 @@ div.gallery_links a.item_download {
 }
 
 div.gallery_links a.item_download:hover {
-  background: transparent url(/images/gallery/image_down.png) no-repeat center center;
+  background: transparent url(/images/gallery/image_down.png) no-repeat center 50px;
 }
 
 div.gallery_links a.item_right {
@@ -161,7 +163,7 @@ div.gallery_links a.item_right {
 }
 
 div.gallery_links a.item_right:hover {
-  background: transparent url(/images/gallery/image_right.png) no-repeat right center;
+  background: transparent url(/images/gallery/image_right.png) no-repeat right 50px;
 }
 
 div.gallery_foot {

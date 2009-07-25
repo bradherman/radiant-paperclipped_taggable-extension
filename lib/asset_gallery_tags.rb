@@ -178,7 +178,7 @@ module AssetGalleryTags
       size = options[:size] || 'large'
       thumbsize = options[:thumbnail_size] || 'icon'
       dlsize = options[:download_size] || 'original'
-      per_slide = (options[:thumbnails_per_page] || 30).to_i
+      per_slide = (options[:thumbnails_per_page] || 20).to_i
       tag.locals.asset = tag.locals.assets.first
       
       result = %{

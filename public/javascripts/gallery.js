@@ -46,11 +46,8 @@ var Gallery = new Class({
       this.showPageLinks();
       this.showPageNumber();
       this.preloader = null;
-
       this.current_page.first_item.showMe();
-      
-      // alert(this.showing.getStyle('z-index'));
-      // alert(this.links_holder.getStyle('z-index'));
+
     } else {
       this.footer.set('text', '');
     }
@@ -141,11 +138,11 @@ var Gallery = new Class({
     // this.links_holder.setStyle('background-color', '#d1005d');
   },
   say: function (message) {
-    this.revert_message = this.captioner.get('text');
-    this.captioner.set('text', message);
+    this.revert_message = this.captioner.get('html');
+    this.captioner.set('html', message);
   },
   unsay: function (message) {
-    this.captioner.set('text', this.revert_message);
+    this.captioner.set('html', this.revert_message);
   }
 });
 
@@ -223,7 +220,7 @@ var GalleryItem = new Class({
     return this.page.itemAfter(this);
   },
   highlightMe: function () {
-    this.borderFX.start('#868e8d');
+    this.borderFX.start('#d1005d');
   },
   unHighlightMe: function () {
     this.borderFX.start('#ffffff');

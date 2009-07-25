@@ -13,8 +13,8 @@ div.gallery_shower {
   background: transparent url(/images/gallery/spinner.gif) no-repeat 50% 25%;
 }
 
-div.gallery_caption{
-  font-family: HelveticaNeue-Roman, helvetica, arial, sans-serif;
+div.gallery_caption {
+  font-family: HelveticaNeue-Light, helvetica, arial, sans-serif;
   font-size: 0.8em;
   line-height: 1.1;
   padding: 5px;
@@ -24,14 +24,18 @@ div.gallery_caption{
   overflow: hidden;
 }
 
+div.gallery_caption span.copyright {
+  color: #c3c3c3;
+}
+
 div.gallery_wrapper{
   position: relative;
   overflow: hidden;
   padding: 0;
-  width: 690px;
+  width: 680px;
   float: left;
-  height: 204px;
-  margin: 0 22px;
+  height: 136px;
+  margin: 0 27px;
 }
 
 div.gallery_slider{
@@ -41,14 +45,15 @@ div.gallery_slider{
   overflow: hidden;
 }
 
-ul.gallery_page{
+ul.gallery_page {
   margin: 0;
   padding: 0;
   list-style: none;
   letter-spacing: 0;
-  width: 690px;
+  width: 680px;
   height: 204px;
   float: left;
+  overflow: hidden;
 }
 ul.gallery_page li {
   float:left;
@@ -58,12 +63,18 @@ ul.gallery_page li {
   width:68px;
   height:68px;
 }
+ul.gallery_page a.gallery_preview {
+  opacity: 0.2;
+}
+ul.gallery_page a.gallery_preview:hover {
+  opacity: 1;
+}
 ul.gallery_page img.gallery_thumb {
   width:64px;
   height:64px;
   margin: 0;
   border: 2px solid white;
-  padding:0;
+  padding: 0;
 }
 ul.gallery_page img.previewed {
   border: 2px solid #d1005d;
@@ -78,24 +89,25 @@ a.gallery_left, a.gallery_right{
   display: block;
   float: left;
   width: 30px;
-  height: 204px;
+  height: 136px;
   text-indent: -40px;
   text-decoration: none;
   z-index: 1000; 
   color: white;
   background-color: red;
   overflow: hidden;
+  opacity: 0.3;
 }
-
+a.gallery_left:hover, a.gallery_right:hover {
+  opacity: 1;
+}
 a.gallery_left {
   margin: 0;
   background: white url(/images/gallery/dim_left.png) no-repeat center 20px;
 }
-
 a.gallery_left:hover {
   background: white url(/images/gallery/simple_left.png) no-repeat center 20px;
 }
-
 a.left_end {
   background: white url(/images/gallery/dim_far_right.png) no-repeat center 20px;
 }
@@ -174,7 +186,7 @@ div.gallery_foot {
   font-size: 0.8em;
   line-height: 1.1;
   padding: 5px;
-  color:#999;
+  color: #ddd;
 }
 
 /* ie fix */

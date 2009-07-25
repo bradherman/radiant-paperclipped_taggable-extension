@@ -192,12 +192,19 @@ module AssetGalleryTags
       counter = 0
       tag.locals.assets.each do |asset|
         tag.locals.asset = asset
+        copyright = %{<span class="copyright">&copy; #{asset.copyright}</span>} if asset.respond_to?(:copyright) && !asset.copyright.blank?
         result << %{
         <li class="gallery_item" id="asset_#{asset.id}">
           <a class="gallery_preview" href="#{tag.render('assets:url', 'size' => size)}">
             <img class="gallery_thumb" alt="#{tag.render('assets:title')} thumbnail" src="#{tag.render('assets:url', 'size' => thumbsize)}"/>
           </a>
-          <a class="gallery_download" title="download" href="#{tag.render('assets:url', 'size' => dlsize)}">#{tag.render('assets:caption')}</a>
+          <a class="gallery_download" title="download" href="#{tag.render('assets:url', 'size' => dlsize)}">
+            <strong>
+              #{tag.render('assets:title')}
+            </strong><br />
+            #{tag.render('assets:caption')}
+            #{copyright}
+          </a>
         </li>}
         counter += 1
         result << %{

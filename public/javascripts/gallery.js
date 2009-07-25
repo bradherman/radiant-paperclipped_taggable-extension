@@ -2,7 +2,17 @@ var nowt = "";
 
 window.addEvent('domready', function() {
   $$('div.gallery').each( function (element) { new Gallery(element); }); 
+  $$('div.minigallery').each( function (element) { new Minigallery(element); }); 
 });
+
+var blockEvent = function (e) {
+  if (e) {
+    var event = new Event(e).stop();
+    event.preventDefault();
+    if (event.target) event.target.blur();
+    return event;
+  }
+};
 
 var Gallery = new Class({
   initialize: function (element) { 
@@ -114,7 +124,7 @@ var Gallery = new Class({
     this.transitionOut.start(0);  // -> preloadIncomingItem
   },
   preloadIncomingItem: function () {
-    fadeup = this.finishShowItem.bind(this);
+    var fadeup = this.finishShowItem.bind(this);
     this.preloader = new Asset.image(this.incoming_item.preview_url, {onload : fadeup});  // -> finishShowItem
   },
   finishShowItem: function () {
@@ -227,11 +237,60 @@ var GalleryItem = new Class({
   }
 });
 
-var blockEvent = function (e) {
-  if (e) {
-    var event = new Event(e).stop();
-    event.preventDefault();
-    if (event.target) event.target.blur();
-    return event;
+var Minigallery = new Class({
+  initialize: function (element) { 
+    this.container = element;   
+    this.showing = this.container.getElement('img');
+    this.caption = this.container.getElement('p.caption');
+    this.items = [];
+    this.container.getElements('li.thumbnail').each(function (element) { this.items.push(new MinigalleryItem(element, this)); }, this);
+    this.current_item = this.items[0];
+    this.incoming_item = null;
+    this.preloader = null;
+    this.showing.set('tween', {duration: 'short', onComplete: this.loadIncomingItem.bind(this)});
+    this.current_item.showMe();
+  },
+  showItem: function (item) {
+    this.incoming_item = item;
+    this.fadeOut();
+  },
+  fadeOut: function () {
+    this.current_item.hideMe();
+    this.showing.fade('out');  // -> loadIncomingItem
+    this.caption.fade('out');
+  },
+  loadIncomingItem: function (argument) {
+    if (this.incoming_item) {
+      var fadein = this.fadeIn.bind(this);
+      this.preloader = new Asset.image(this.incoming_item.bigger, {onload : fadein});  // -> fadeIn
+    }
+  },
+  fadeIn: function () {
+    this.showing.set('src', this.preloader.get('src'));
+    this.current_item = this.incoming_item;
+    this.incoming_item = null;
+    this.caption.set('text', this.current_item.caption);
+    this.showing.fade('in');
+    this.caption.fade('in');
   }
-};
+});
+
+var MinigalleryItem = new Class({
+  initialize: function (element, gallery) {    
+    this.container = element;
+    this.gallery = gallery;
+    this.icon = element.getElement('img');
+    this.clicker = element.getElement('a');
+    this.caption = this.clicker.get('title');
+    this.bigger = this.clicker.get('href');
+    this.clicker.onclick = this.showMe.bindWithEvent(this);
+  },
+  showMe: function (e) {
+    blockEvent(e);
+    this.gallery.showItem(this);
+    this.clicker.addClass('up');
+  },
+  hideMe: function () {
+    this.clicker.removeClass('up');
+  }
+});

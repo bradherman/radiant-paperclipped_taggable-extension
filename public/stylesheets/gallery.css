@@ -194,3 +194,58 @@ div.gallery_foot {
 div.gallery_links, div.gallery_links a { 
   background: transparent url(/images/gallery/dot.gif) no-repeat left top;  
 }
+
+
+
+/******** minigallery and page illustration ********/
+
+div.minigallery {
+	width: 260px; 
+	float: right; 
+	margin: 0 6px 10px 16px;
+}
+
+div.minigallery img {
+	float: left;
+	margin: 0 2px 2px 0;
+}
+
+div.minigallery p {
+	clear: left;
+	margin: 4px 0 0 0;
+	font-size: 80%;
+	font-family: HelveticaNeue-Light, helvetica, arial, sans-serif;
+}
+
+div.minigallery p.caption {
+  width: 250px;
+  height: 36px;
+  overflow: hidden;
+	clear: left;
+	margin: 4px 0 4px 0;
+	font-size: 75%;
+	font-family: HelveticaNeue-Light, helvetica, arial, sans-serif;
+	color: #868e8d;
+}
+
+div.minigallery ul.thumbnails {
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+
+div.minigallery li.thumbnail {
+  display: inline;
+}
+
+div.minigallery li.thumbnail a {
+  opacity: 0.2;
+}
+
+div.minigallery li.thumbnail a.up {
+  opacity: 1;
+}
+
+div.minigallery li.thumbnail a:hover {
+  opacity: 1;
+}

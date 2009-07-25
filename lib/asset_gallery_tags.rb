@@ -114,7 +114,7 @@ module AssetGalleryTags
   
   desc %{ 
     Presents a standard marginal gallery block suitable for turning unobtrusively into a rollover or lightbox gallery. 
-    We need to be able to work out a collection of assets: that can be defined already (eg by assets:all) or come from a page or tag or from one or more tags.
+    We need to be able to work out a collection of assets: that can be defined already (eg by assets:all) or come from a page or from one or more tags.
     If no tags are found, nothing is displayed.
     Default preview size is 'large' and thumbnail size 'thumbnail' but you can specify any standard asset sizes.
     
@@ -125,28 +125,42 @@ module AssetGalleryTags
 
   }
   tag 'assets:minigallery' do |tag|
-    raise TagError, "asset collection must be available for assets:minigallery tag" unless tag.locals.assets or tag.locals.page or tag.locals.tag or tag.attr['tags']
+    options = tag.attr.dup.symbolize_keys
+    raise TagError, "asset collection must be available for assets:minigallery tag" unless tag.locals.assets or tag.locals.page or tag.attr[:tags]
     if options[:tags] && tags = Tag.from_list(options[:tags])
       tag.locals.assets = Asset.images.from_tags(tags)
     else
-      tag.locals.assets = Asset.images
+      tag.locals.assets = tag.locals.page.assets.images
     end
+    tag.locals.assets.to_a     # because we can't let empty? trigger a call to count
 
     unless tag.locals.assets.empty?
-      size = tag.attr['size'] || 'large'
-      thumbsize = tag.attr['thumbnail_size'] || 'thumbnail'
+      size = tag.attr['size'] || 'illustration'
+      thumbsize = tag.attr['thumbnail_size'] || 'icon'
       result = ""
-      result << %{<div class="illustration">}
-      tag.locals.asset = assets.shift
+      result << %{
+<div class="minigallery">}
+      tag.locals.asset = tag.locals.assets.first
       result << tag.render('assets:image', {'size' => size})
-      result << %{<p class="caption">#{tag.locals.asset.caption}</p>}
-      tag.locals.assets.each do |a|
-        tag.locals.asset = a
-        result << %{<div class="thumbnail"><a href="#{tag.render('assets:link', 'size' => 'illustration')}">}
-        result << tag.render('assets:image', {'size' => thumbsize, 'title' => a.caption, 'alt' => a.title})
-        result << %{</a></div>}
+      result << %{
+  <p class="caption">#{tag.render('assets:caption')}</p>
+  <ul class="thumbnails">}
+      if tag.locals.assets.size > 1
+        tag.locals.assets.each do |asset|
+          tag.locals.asset = asset
+          result << %{
+    <li class="thumbnail">
+      <a href="#{tag.render('assets:url', 'size' => 'illustration')}" title="#{asset.caption}" id="thumbnail_#{asset.id}">
+        }
+          result << tag.render('assets:image', {'size' => thumbsize, 'alt' => asset.title})
+          result << %{
+      </a>
+    </li>}
+        end
       end
-      result << %{</div>}
+      result << %{
+  </ul>
+</div>}
       result
     end
   end

@@ -81,7 +81,7 @@ module AssetGalleryTags
     <pre><code><r:tagged_assets:each>...</r:tagged_assets:each></code></pre>
   }
   tag 'tagged_assets' do |tag|
-    tag.locals.assets ||= tag.locals.tags ? Asset.from_tags(tag.locals.tags) : Asset.find(:all)
+    tag.locals.assets = Asset.from_tags(tag.locals.tags) if tag.locals.tags
     tag.expand
   end
   tag 'tagged_assets:each' do |tag|
@@ -95,6 +95,25 @@ module AssetGalleryTags
   
   
   Asset.known_types.each do |type|
+    desc %{
+      Loops through all assets of the specified type.
+
+      *Usage:* 
+      <pre><code><r:assets:#{type.to_s.pluralize}>...</r:assets:#{type.to_s.pluralize}></code></pre>
+    }
+    tag "assets:#{type.to_s.pluralize}" do |tag|
+      tag.locals.assets = Asset.send("#{type.to_s.pluralize}".intern)
+      tag.expand
+    end
+    tag "assets:#{type.to_s.pluralize}:each" do |tag|
+      result = []
+      tag.locals.assets.each do |asset|
+        tag.locals.asset = asset
+        result << tag.expand
+      end 
+      result
+    end
+
     desc %{
       Renders the contained elements only if there are any assets of the specified type in the current set.
 

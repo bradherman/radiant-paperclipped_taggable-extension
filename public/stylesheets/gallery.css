@@ -249,3 +249,26 @@ div.minigallery li.thumbnail a.up {
 div.minigallery li.thumbnail a:hover {
   opacity: 1;
 }
+
+
+
+/******** image list ********/
+
+ul.imagelist {
+  list-style: none;
+  margin: 0;
+}
+
+ul.imagelist li {
+  display: inline;
+}
+
+ul.imagelist li a {
+  border: 1px solid white;
+}
+
+ul.imagelist li a:hover {
+  border: 1px solid #d1005d;
+}
+
+

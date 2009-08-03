@@ -3,34 +3,8 @@ module AssetGalleryTags
   
   class TagError < StandardError; end
     
-  desc %{
-    Prepares a collection of all the assets in the site. Useful to set context for a gallery or tag cloud.
-    Supply a type parameter with one of image, audio, movie or other to limit the collection to that kind of asset.
-  }    
-  tag "assets:everything" do |tag|
-    tag.locals.assets = Asset.find(:all)
-    _subset_assets!(tag)
-    tag.expand
-  end
-
-  desc %{
-    Prepares a collection of all the assets attached to the page. Useful to set context for a gallery or tag cloud.
-  }    
-  tag "assets:all" do |tag|
-    tag.locals.assets = tag.locals.page.assets
-    tag.expand
-  end
-
-  %w(movie audio image other playable).each do |type|
-    desc %{
-      Prepares a collection of all the #{type} assets attached to the current page.  
-    }    
-    tag "assets:all_#{type.pluralize}" do |tag|
-      tag.locals.assets ||= tag.locals.page.assets.send(type.pluralize.intern).find(:all)
-      tag.expand
-    end
-  end
-  
+  # single-asset radius tags: listing attached tags and related assets
+    
   desc %{
     Cycles through all tags attached to present asset.
     Takes the same sort and order parameters as children:each.
@@ -74,7 +48,9 @@ module AssetGalleryTags
     result
   end
 
-  
+
+  # single-tag radius tags: listing assets associated with a particular tag
+
   desc %{
     Loops through the assets to which the present tag has been applied
     
@@ -95,32 +71,139 @@ module AssetGalleryTags
   end
 
 
+  # multiple tags: given tags, get lists of tagged assets and subset the lists in useful ways
+
   desc %{
-    Loops through all the assets with any of the specified tags,
-    In descending order of overlap between asset tags and specified list
+    Lists all the assets associated with a set of tags, in descending order of relatedness.
+    If no tags are in context, we get all the assets (a useful default for galleries)
     
     *Usage:* 
-    <pre><code><r:assets:tagged tags="tag1[, tag2, etc]">...</r:assets:tagged></code></pre>
-  }    
-  tag 'assets:tagged' do |tag|
+    <pre><code><r:tagged_assets:each>...</r:tagged_assets:each></code></pre>
+  }
+  tag 'tagged_assets' do |tag|
+    tag.locals.assets ||= tag.locals.tags ? Asset.from_tags(tag.locals.tags) : Asset.find(:all)
+    tag.expand
+  end
+  tag 'tagged_assets:each' do |tag|
     result = []
-    _assets_for_tags(tag.attr['tags']).each do |asset|
+    tag.locals.assets.each do |asset|
       tag.locals.asset = asset
       result << tag.expand
     end 
     result
   end
+  
+  
+  Asset.known_types.each do |type|
+    desc %{
+      Renders the contained elements only if there are any assets of the specified type in the current set.
 
+      *Usage:* 
+      <pre><code><r:tagged_assets:if_any_#{type.to_s.pluralize}>...</r:tagged_assets:if_any_#{type.to_s.pluralize}></code></pre>
+    }
+    tag "tagged_assets:if_any_#{type.to_s.pluralize}" do |tag|
+      assets = tag.locals.assets.send("#{type.to_s.pluralize}".intern).to_a
+      STDERR.puts ">> tagged_assets:if_any_#{type.to_s.pluralize}: assets are #{assets.map(&:title)}"
+      tag.expand if assets.any?
+    end
+
+    desc %{
+      Renders the contained elements only if there are no assets of the specified type in the current set.
+
+      *Usage:* 
+      <pre><code><r:tagged_assets:unless_any_#{type.to_s.pluralize}>...</r:tagged_assets:unless_any_#{type.to_s.pluralize}></code></pre>
+    }
+    tag "tagged_assets:unless_any_#{type.to_s.pluralize}" do |tag|
+      assets = tag.locals.assets.send("#{type.to_s.pluralize}".intern).to_a
+      STDERR.puts ">> tagged_assets:if_any_#{type.to_s.pluralize}: assets are #{assets.map(&:title)}"
+      tag.expand unless assets.any?
+    end
+    
+    desc %{
+      Renders the contained elements only if there are assets not of the specified type in the current set.
+
+      *Usage:* 
+      <pre><code><r:tagged_assets:if_any_not_#{type.to_s.pluralize}>...</r:tagged_assets:if_any_not_#{type.to_s.pluralize}></code></pre>
+    }
+    tag "tagged_assets:if_any_not_#{type.to_s.pluralize}" do |tag|
+      assets = tag.locals.assets.send("not_#{type.to_s.pluralize}".intern).to_a
+      tag.expand if assets.any?
+    end
+
+    desc %{
+      Renders the contained elements only if there are only assets of the specified type in the current set.
+
+      *Usage:* 
+      <pre><code><r:tagged_assets:unless_any_not_#{type.to_s.pluralize}>...</r:tagged_assets:unless_any_not_#{type.to_s.pluralize}></code></pre>
+    }
+    tag "tagged_assets:unless_any_not_#{type.to_s.pluralize}" do |tag|
+      assets = tag.locals.assets.send("not_#{type.to_s.pluralize}".intern).to_a
+      STDERR.puts ">> tagged_assets:unless_any_not_#{type.to_s.pluralize}: assets are #{assets.map(&:title)}"
+      tag.expand unless assets.any?
+    end
+
+    desc %{
+      Loops through all the assets in the current set that are of the specified type.
+
+      *Usage:* 
+      <pre><code><r:tagged_assets:#{type.to_s.pluralize}:each>...</r:tagged_assets:#{type.to_s.pluralize}:each></code></pre>
+
+      You can also call tagged_assets:#{type.to_s.pluralize} without the :each if you want to set the asset collection that will 
+      become the context for eg. a tag cloud:
+      
+      <pre><code><r:tagged_assets:#{type.to_s.pluralize}><r:tagged_assets:tag_cloud /></r:tagged_assets:#{type.to_s.pluralize}></code></pre>
+    }
+    tag "tagged_assets:#{type.to_s.pluralize}" do |tag|
+      tag.locals.assets = tag.locals.assets.send(type.to_s.pluralize.intern)
+      tag.expand
+    end
+    tag "tagged_assets:#{type.to_s.pluralize}:each" do |tag|
+      result = []
+      tag.locals.assets.each do |asset|
+        tag.locals.asset = asset
+        result << tag.expand
+      end 
+      result
+    end
+
+    desc %{
+      Loops through all the assets in the current set that are not of the specified type.
+
+      *Usage:* 
+      <pre><code><r:tagged_assets:not_#{type.to_s.pluralize}:each>...</r:tagged_assets:not_#{type.to_s.pluralize}:each></code></pre>
+      
+      You can also call tagged_assets:not_#{type.to_s.pluralize} without the :each if you want to set the asset collection that will 
+      become the context for eg. a tag cloud:
+      
+      <pre><code><r:tagged_assets:not_#{type.to_s.pluralize}><r:tagged_assets:tag_cloud /></r:tagged_assets:not_#{type.to_s.pluralize}></code></pre>
+    }
+    tag "tagged_assets:not_#{type.to_s.pluralize}" do |tag|
+      tag.locals.assets = tag.locals.assets.send("not_#{type.to_s.pluralize}".intern)
+      tag.expand
+    end
+    tag "tagged_assets:not_#{type.to_s.pluralize}:each" do |tag|
+      result = []
+      tag.locals.assets.each do |asset|
+        tag.locals.asset = asset
+        result << tag.expand
+      end 
+      result
+    end
+  end
+
+  # displaying sets of assets 
+  # all of these tags require that a set of assets has been designated.
   
   desc %{ 
     Presents a standard marginal gallery block suitable for turning unobtrusively into a rollover or lightbox gallery. 
-    We need to be able to work out a collection of assets: that can be defined already (eg by assets:all) or come from a page or from one or more tags.
-    If no tags are found, nothing is displayed.
-    Default preview size is 'large' and thumbnail size 'thumbnail' but you can specify any standard asset sizes.
+    We need to be able to work out a collection of assets: that can be defined already (eg by assets:all) or come from the current page.
+    Default preview size is 'large' and thumbnail size 'thumbnail' but you can specify any of your asset sizes.
     
     *Usage:*
     <pre><code>
-      <r:assets:minigallery [size="..."] [thumbnail_size="..."] [tags="one,or,more,tags"] />
+      <r:assets:images>
+        <r:assets:minigallery [size="..."] [thumbnail_size="..."] [tags="one,or,more,tags"] />
+      </r:assets:images>
     </code></pre>
 
   }
@@ -130,9 +213,9 @@ module AssetGalleryTags
     if options[:tags] && tags = Tag.from_list(options[:tags])
       tag.locals.assets = Asset.images.from_tags(tags)
     else
-      tag.locals.assets = tag.locals.page.assets.images
+      tag.locals.assets = tag.locals.page.assets
     end
-    tag.locals.assets.to_a     # because we can't let empty? trigger a call to count
+    tag.locals.assets.images.to_a     # because we can't let empty? trigger a call to count
 
     unless tag.locals.assets.empty?
       size = tag.attr['size'] || 'illustration'
@@ -176,15 +259,18 @@ module AssetGalleryTags
     <pre><code>
     <r:assets:gallery [size="..."] [thumbnail_size="..."] [download_size="..."] [no_download="false"] [tags="one,or,more,tags"] [thumbnails_per_page="30"] />
     </code></pre>
+    
+    nb. One important difference: r:assets:minigallery defaults to displaying images associated with the current page. r:assets:gallery defaults to displaying the whole image set.
   }
   tag 'assets:gallery' do |tag|
     options = tag.attr.dup.symbolize_keys
 
     if options[:tags] && tags = Tag.from_list(options[:tags])
-      tag.locals.assets = Asset.images.from_tags(tags).to_a
+      tag.locals.assets = Asset.images.from_tags(tags)
     else
-      tag.locals.assets = Asset.images.to_a
+      tag.locals.assets = Asset.images
     end
+    tag.locals.assets.to_a     # because we can't let empty? trigger a call to count
     
     if tag.locals.assets.empty?
       result = "<p>No images found</p>"
@@ -242,45 +328,36 @@ module AssetGalleryTags
     Options and enclosed markup are passed through to r:tag_cloud.
     
     *Usage:*
-    <pre><code>
-    <r:assets:tag_cloud />
-    </code></pre>
+    <pre><code><r:assets:tag_cloud /></code></pre>
+    
+    This will only show tags that have been attached to assets. If you want to show a tag cloud for the whole site, use this instead: 
+    
+    <pre><code><r:tag_cloud all='true' /></code></pre>
+    
+    which will include asset-tagging (and pages and any other kind of tagged item) in its calculation of prominence.
   }
   tag 'assets:tag_cloud' do |tag|
-    assets = _current_assets(tag)
-    limit = tag.attr['limit'] || 50
+    options = tag.attr.dup
+    assets = if tag.locals.assets
+      tag.locals.assets
+    elsif taglist = options.delete('tags')
+      _assets_for_tags(taglist)
+    else
+      Asset.find(:all)
+    end
+    
+    limit = options.delete('limit') || 100
     if assets.any?
       tag.locals.tags = Tag.banded(Tag.attached_to(assets).most_popular(limit))
-      tag.render('tag_cloud')
+      tag.render('tags:cloud', options)
     end
   end
-  
-  
-  
-  
-  
-  
-
-
-
 
   private
-    
-    def _current_assets(tag)
-      if tag.locals.assets
-        tag.locals.assets
-      elsif tag.attr['tags']
-        _assets_for_tags(tag.attr['tags'])
-      elsif tag.locals.tag
-        tag.locals.tag.assets
-      else
-        Asset.find(:all)
-      end
-    end
-  
+      
     def _assets_for_tags(taglist, strict=false)
       tags = Tag.from_list(taglist)
-      assets = Asset.from_tags(tags).find(:all)     # without the find, if we call .empty? it tries to count() and that fails
+      assets = Asset.from_tags(tags).find(:all)     # without the find, if we call .empty? it tries to count() and fails because of the count already in the named_scope
       assets.select!{ |a| a.match_count.to_i == tags.length} if strict and not assets.empty?
       assets
     end

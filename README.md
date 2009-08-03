@@ -15,7 +15,7 @@ New but very simple. The work is done in the taggable extension: all we really d
 ## Requirements
 
 * Radiant 0.7.x or 0.8.0.
-* [paperclipped](https://github.com/kbingman/paperclipped) and [taggable](https://github.com/spanner/radiant-taggable-extension) extensions
+* [paperclipped](https://github.com/spanner/paperclipped) (currently, requires our fork) and [taggable](https://github.com/spanner/radiant-taggable-extension) extensions
 
 The galleries use mootools, which is included, because I like it better. 
 It's all done unobtrusively - all we put on the page is lists - so you could easily replace it with a slimbox or some other library.
@@ -35,21 +35,30 @@ You need to make sure that paperclipped and taggable load before this does. Mult
   
 ## Examples
 
-There are galleries (with sample css and javascript):
+There are galleries and tag clouds:
 
 	<r:assets:gallery tags="ridiculous,special" match_all="true" />		#-> full-page gallery of all images having both tags
-
 	<r:assets:minigallery />                   							#-> small rollover gallery of all images attached to current page.
-	
-And general-purpose archive tags to match those for pages:
-
-	<r:assets:tags:each><li><r:tag:title /></li></r:assets:tags:each>
-
 	<r:assets:tag_cloud />
 	
-	<r:assets:related><r:thumbnail /></r:assets:related>
+Selection and sub-selection tags for displaying various lists, usually but not necessarily on TagPage pages:
 
-See the radius tag documentation for details. 
+	<r:tagged_assets:each>...</r:tagged_assets:each>
+
+and for each type of asset:
+
+	<r:tagged_assets:images:each>...</r:tagged_assets:images:each>
+	<r:tagged_assets:if_any_images>...</r:tagged_assets:if_any_images>
+	<r:tagged_assets:unless_any_images>...</r:tagged_assets:unless_any_images>
+	<r:tagged_assets:if_any_not_images>...</r:tagged_assets:if_any_not_images>
+	<r:tagged_assets:unless_any_not_images>...</r:tagged_assets:unless_any_not_images>
+
+General-purpose archive tags to match those for pages:
+
+	<r:assets:tags:each><li><r:tag:title /></li></r:assets:tags:each>
+	<r:assets:related><r:link /></r:assets:related>
+
+For consistency the asset tags use the plural form. See the radius tag documentation for details. 
 
 ## Author and copyright
 

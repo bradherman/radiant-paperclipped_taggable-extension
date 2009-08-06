@@ -2,54 +2,230 @@ module AssetGalleryTags
   include Radiant::Taggable
   
   class TagError < StandardError; end
+
+  # mostly we're just extending TaggableTags with Asset versions of the Page tags
+
+  ################# assets from many tags
+
+  %W{all top page requested coincident}.each do |these|
+
+    ################# assety suffixes pass on to the relevant tags:assets method. Again, only requested_tags is likely to be much used here.
+
+    desc %{
+      Lists all the assets tagged with any of the set of #{these} tags, in descending order of overlap.
+
+      *Usage:* 
+      <pre><code><r:#{these}_tags:assets:each>...</r:#{these}_tags:assets:each></code></pre>
+    }
+    tag "#{these}_tags:assets" do |tag|
+      tag.locals.assets = Asset.from_all_tags(tag.locals.tags)
+      tag.expand
+    end
+    tag "#{these}_tags:assets:each" do |tag|
+      tag.render('asset_list', tag.attr.dup, &tag.block)
+    end
+
+    desc %{
+      Renders the contained elements only if there are any assets associated with the set of #{these} tags.
+
+      *Usage:* 
+      <pre><code><r:#{these}_tags:if_assets>...</r:#{these}_tags:if_assets></code></pre>
+    }
+    tag "#{these}_tags:if_assets" do |tag|
+      tag.render('tags:if_assets', tag.attr.dup, &tag.block)
+    end
+
+    desc %{
+      Renders the contained elements only if there are no assets associated with the set of #{these} tags.
+
+      *Usage:* 
+      <pre><code><r:#{these}_tags:unless_assets>...</r:#{these}_tags:unless_assets></code></pre>
+    }
+    tag "#{these}_tags:unless_assets" do |tag|
+      tag.render('tags:unless_assets', tag.attr.dup, &tag.block)
+    end
     
-  # single-asset radius tags: listing attached tags and related assets
+    ################# then we disappear up the various asset types and the many conditional possibilities
+                    # incidentally also creating assets tags like r:assets:images:each
+    
+    Asset.known_types.each do |type|
+      
+      desc %{
+        Loops through all assets of type #{type}.
+
+        *Usage:* 
+        <pre><code><r:assets:#{type.to_s.pluralize}>...</r:assets:#{type.to_s.pluralize}></code></pre>
+      }
+      tag "assets:#{type.to_s.pluralize}" do |tag|
+        tag.locals.assets = Asset.send(type.to_s.pluralize.intern)
+        tag.expand
+      end
+      tag "assets:#{type.to_s.pluralize}:each" do |tag|
+        tag.render('asset_list', tag.attr.dup, &tag.block)      # doesn't look right, but tags:assets:each is just an asset lister: it doesn't care where they come from
+      end
+      
+      desc %{
+        Loops through all assets of type #{type} associated with the set of #{these} tags
+
+        *Usage:* 
+        <pre><code><r:#{these}_tags:#{type.to_s.pluralize}>...</r:#{these}_tags:#{type.to_s.pluralize}></code></pre>
+      }
+      tag "#{these}_tags:#{type.to_s.pluralize}" do |tag|
+        tag.locals.assets = Asset.from_all_tags(tag.locals.tags).send("#{type.to_s.pluralize}".intern)
+        tag.expand
+      end
+      tag "#{these}_tags:#{type.to_s.pluralize}:each" do |tag|
+        tag.render('asset_list', tag.attr.dup, &tag.block)
+      end
+
+      desc %{
+        Loops through all assets not of type #{type} associated with the set of #{these} tags
+
+        *Usage:* 
+        <pre><code><r:#{these}_tags:non_#{type.to_s.pluralize}>...</r:#{these}_tags:non_#{type.to_s.pluralize}></code></pre>
+      }
+      tag "#{these}_tags:non_#{type.to_s.pluralize}" do |tag|
+        tag.locals.assets = Asset.from_all_tags(tag.locals.tags).send("not_#{type.to_s.pluralize}".intern)
+        tag.expand
+      end
+      tag "#{these}_tags:non_#{type.to_s.pluralize}:each" do |tag|
+        tag.render('asset_list', tag.attr.dup, &tag.block)
+      end
+
+      desc %{
+        Renders the contained elements only if there are any assets of type #{type} associated with the set of #{these} tags.
+
+        *Usage:* 
+        <pre><code><r:#{these}_tags:if_#{type.to_s.pluralize}>...</r:#{these}_tags:if_#{type.to_s.pluralize}></code></pre>
+      }
+      tag "#{these}_tags:if_#{type.to_s.pluralize}" do |tag|
+        assets = Asset.from_all_tags(tag.locals.tags).send("#{type.to_s.pluralize}".intern)
+        tag.expand if assets.any?
+      end
+
+      desc %{
+        Renders the contained elements only if there are no assets of type #{type} associated with the set of #{these} tags.
+
+        *Usage:* 
+        <pre><code><r:#{these}_tags:unless_#{type.to_s.pluralize}>...</r:#{these}_tags:unless_#{type.to_s.pluralize}></code></pre>
+      }
+      tag "#{these}_tags:unless_#{type.to_s.pluralize}" do |tag|
+        assets = Asset.from_all_tags(tag.locals.tags).send("#{type.to_s.pluralize}".intern)
+        tag.expand unless assets.any?
+      end
+
+      desc %{
+        Renders the contained elements only if there are assets not of type #{type} associated with the set of #{these} tags.
+
+        *Usage:* 
+        <pre><code><r:#{these}_tags:if_non_#{type.to_s.pluralize}>...</r:#{these}_tags:if_non_#{type.to_s.pluralize}></code></pre>
+      }
+      tag "#{these}_tags:if_non_#{type.to_s.pluralize}" do |tag|
+        assets = Asset.from_all_tags(tag.locals.tags).send("not_#{type.to_s.pluralize}".intern)
+        tag.expand if assets.any?
+      end
+
+      desc %{
+        Renders the contained elements only if there no assets not of type #{type} associated with the set of #{these} tags.
+
+        *Usage:* 
+        <pre><code><r:#{these}_tags:unless_non_#{type.to_s.pluralize}>...</r:#{these}_tags:unless_non_#{type.to_s.pluralize}></code></pre>
+      }
+      tag "#{these}_tags:unless_non_#{type.to_s.pluralize}" do |tag|
+        assets = Asset.from_all_tags(tag.locals.tags).send("not_#{type.to_s.pluralize}".intern)
+        tag.expand unless assets.any?
+      end
+    end
+  end
+  
+  desc %{
+    Lists all the assets associated with a set of tags, in descending order of relatedness.
+    
+    *Usage:* 
+    <pre><code><r:tags:assets:each>...</r:tags:assets:each></code></pre>
+  }
+  tag 'tags:assets' do |tag|
+    tag.locals.assets ||= Asset.from_all_tags(tag.locals.tags)
+    tag.expand
+  end
+  tag 'tags:assets:each' do |tag|
+    tag.render('asset_list', tag.attr.dup, &tag.block)
+  end
     
   desc %{
+    Renders the contained elements only if there are any assets associated with the current set of tags.
+
+    *Usage:* 
+    <pre><code><r:tags:if_assets>...</r:tags:if_assets></code></pre>
+  }
+  tag "tags:if_assets" do |tag|
+    tag.locals.assets = Asset.from_all_tags(tag.locals.tags)
+    tag.expand if tag.locals.assets.any?
+  end
+
+  desc %{
+    Renders the contained elements only if there are no pages associated with the current set of tags.
+
+    *Usage:* 
+    <pre><code><r:tags:unless_assets>...</r:tags:unless_assets></code></pre>
+  }
+  tag "tags:unless_assets" do |tag|
+    tag.locals.assets = Asset.from_all_tags(tag.locals.tags)
+    tag.expand unless tag.locals.assets.any?
+  end
+  
+  # general purpose asset lister is needed because the root assets:each tag sets tags.local.assets
+  
+  desc %{
+    This is a general purpose asset lister. It wouldn't normally be accessed directly but a lot of other tags make use of it.
+  }
+  tag 'asset_list' do |tag|
+    result = []
+    tag.locals.assets.each do |page|
+      tag.locals.asset = page
+      result << tag.expand
+    end 
+    result
+  end
+  
+  
+  
+  ################# tags from one asset
+  
+  desc %{
     Cycles through all tags attached to present asset.
-    Takes the same sort and order parameters as children:each.
-    Assets is plural for consistency with other paperclipped tags: 
-    we're actually working with a single asset here.
     
     *Usage:* 
     <pre><code><r:assets:tags><r:tag:title /></r:assets:tags></code></pre>
   }    
   tag 'assets:tags' do |tag|
     raise TagError, "asset must be defined for asset:tags tag" unless tag.locals.asset
+    tag.locals.tags = tag.locals.asset.tags
     tag.expand
   end
   tag 'assets:tags:each' do |tag|
-    result = []
-    tag.locals.asset.tags.each do |t|
-      tag.locals.tag = t
-      result << tag.expand
-    end 
-    result
+    tag.render('tags:each', tag.attr.dup, &tag.block)
   end
 
-  
   desc %{
-    Cycles through related assets of a tagged asset or page in descending order of relatedness.
+    Lists all the assets similar to this asset (based on its tagging), in descending order of relatedness.
     
     *Usage:* 
-    <pre><code><r:assets:related:each>...</r:assets:related:each></code></pre>
-  }    
-  tag 'assets:related' do |tag|
-    raise TagError, "page or asset must be defined for assets:related tag" unless tag.locals.page or tag.locals.asset
+    <pre><code><r:related_assets:each>...</r:related_assets:each></code></pre>
+  }
+  tag 'related_assets' do |tag|
+    raise TagError, "asset must be defined for related_assets tag" unless tag.locals.asset
+    tag.locals.assets = tag.locals.asset.related_assets
     tag.expand
   end
-  tag 'assets:related:each' do |tag|
-    result = []
-    thing = tag.locals.asset || tag.locals.page
-    thing.related_assets.each do |asset|
-      tag.locals.asset = asset
-      result << tag.expand
-    end 
-    result
+  tag 'related_assets:each' do |tag|
+    tag.render('assets:each', tag.attr.dup, &tag.block)
   end
 
 
-  # single-tag radius tags: listing assets associated with a particular tag
+
+
+  ################# assets from one tag
 
   desc %{
     Loops through the assets to which the present tag has been applied
@@ -59,159 +235,19 @@ module AssetGalleryTags
   }    
   tag 'tag:assets' do |tag|
     raise TagError, "tag must be defined for tag:assets tag" unless tag.locals.tag
+    tag.locals.assets = tag.locals.tag.assets
     tag.expand
   end
   tag 'tag:assets:each' do |tag|
-    result = []
-    tag.locals.tag.assets.each do |item|
-      tag.locals.asset = item
-      result << tag.expand
-    end 
-    result
+    tag.render('assets:each', tag.attr.dup, &tag.block)
   end
 
-
-  # multiple tags: given tags, get lists of tagged assets and subset the lists in useful ways
-
-  desc %{
-    Lists all the assets associated with a set of tags, in descending order of relatedness.
-    If no tags are in context, we get all the assets (a useful default for galleries)
-    
-    *Usage:* 
-    <pre><code><r:tagged_assets:each>...</r:tagged_assets:each></code></pre>
-  }
-  tag 'tagged_assets' do |tag|
-    tag.locals.assets = Asset.from_tags(tag.locals.tags) if tag.locals.tags
-    tag.expand
-  end
-  tag 'tagged_assets:each' do |tag|
-    result = []
-    tag.locals.assets.each do |asset|
-      tag.locals.asset = asset
-      result << tag.expand
-    end 
-    result
-  end
   
-  
-  Asset.known_types.each do |type|
-    desc %{
-      Loops through all assets of the specified type.
 
-      *Usage:* 
-      <pre><code><r:assets:#{type.to_s.pluralize}>...</r:assets:#{type.to_s.pluralize}></code></pre>
-    }
-    tag "assets:#{type.to_s.pluralize}" do |tag|
-      tag.locals.assets = Asset.send("#{type.to_s.pluralize}".intern)
-      tag.expand
-    end
-    tag "assets:#{type.to_s.pluralize}:each" do |tag|
-      result = []
-      tag.locals.assets.each do |asset|
-        tag.locals.asset = asset
-        result << tag.expand
-      end 
-      result
-    end
 
-    desc %{
-      Renders the contained elements only if there are any assets of the specified type in the current set.
 
-      *Usage:* 
-      <pre><code><r:tagged_assets:if_any_#{type.to_s.pluralize}>...</r:tagged_assets:if_any_#{type.to_s.pluralize}></code></pre>
-    }
-    tag "tagged_assets:if_any_#{type.to_s.pluralize}" do |tag|
-      assets = tag.locals.assets.send("#{type.to_s.pluralize}".intern).to_a
-      STDERR.puts ">> tagged_assets:if_any_#{type.to_s.pluralize}: assets are #{assets.map(&:title)}"
-      tag.expand if assets.any?
-    end
-
-    desc %{
-      Renders the contained elements only if there are no assets of the specified type in the current set.
-
-      *Usage:* 
-      <pre><code><r:tagged_assets:unless_any_#{type.to_s.pluralize}>...</r:tagged_assets:unless_any_#{type.to_s.pluralize}></code></pre>
-    }
-    tag "tagged_assets:unless_any_#{type.to_s.pluralize}" do |tag|
-      assets = tag.locals.assets.send("#{type.to_s.pluralize}".intern).to_a
-      STDERR.puts ">> tagged_assets:if_any_#{type.to_s.pluralize}: assets are #{assets.map(&:title)}"
-      tag.expand unless assets.any?
-    end
-    
-    desc %{
-      Renders the contained elements only if there are assets not of the specified type in the current set.
-
-      *Usage:* 
-      <pre><code><r:tagged_assets:if_any_not_#{type.to_s.pluralize}>...</r:tagged_assets:if_any_not_#{type.to_s.pluralize}></code></pre>
-    }
-    tag "tagged_assets:if_any_not_#{type.to_s.pluralize}" do |tag|
-      assets = tag.locals.assets.send("not_#{type.to_s.pluralize}".intern).to_a
-      tag.expand if assets.any?
-    end
-
-    desc %{
-      Renders the contained elements only if there are only assets of the specified type in the current set.
-
-      *Usage:* 
-      <pre><code><r:tagged_assets:unless_any_not_#{type.to_s.pluralize}>...</r:tagged_assets:unless_any_not_#{type.to_s.pluralize}></code></pre>
-    }
-    tag "tagged_assets:unless_any_not_#{type.to_s.pluralize}" do |tag|
-      assets = tag.locals.assets.send("not_#{type.to_s.pluralize}".intern).to_a
-      STDERR.puts ">> tagged_assets:unless_any_not_#{type.to_s.pluralize}: assets are #{assets.map(&:title)}"
-      tag.expand unless assets.any?
-    end
-
-    desc %{
-      Loops through all the assets in the current set that are of the specified type.
-
-      *Usage:* 
-      <pre><code><r:tagged_assets:#{type.to_s.pluralize}:each>...</r:tagged_assets:#{type.to_s.pluralize}:each></code></pre>
-
-      You can also call tagged_assets:#{type.to_s.pluralize} without the :each if you want to set the asset collection that will 
-      become the context for eg. a tag cloud:
-      
-      <pre><code><r:tagged_assets:#{type.to_s.pluralize}><r:tagged_assets:tag_cloud /></r:tagged_assets:#{type.to_s.pluralize}></code></pre>
-    }
-    tag "tagged_assets:#{type.to_s.pluralize}" do |tag|
-      tag.locals.assets = tag.locals.assets.send(type.to_s.pluralize.intern)
-      tag.expand
-    end
-    tag "tagged_assets:#{type.to_s.pluralize}:each" do |tag|
-      result = []
-      tag.locals.assets.each do |asset|
-        tag.locals.asset = asset
-        result << tag.expand
-      end 
-      result
-    end
-
-    desc %{
-      Loops through all the assets in the current set that are not of the specified type.
-
-      *Usage:* 
-      <pre><code><r:tagged_assets:not_#{type.to_s.pluralize}:each>...</r:tagged_assets:not_#{type.to_s.pluralize}:each></code></pre>
-      
-      You can also call tagged_assets:not_#{type.to_s.pluralize} without the :each if you want to set the asset collection that will 
-      become the context for eg. a tag cloud:
-      
-      <pre><code><r:tagged_assets:not_#{type.to_s.pluralize}><r:tagged_assets:tag_cloud /></r:tagged_assets:not_#{type.to_s.pluralize}></code></pre>
-    }
-    tag "tagged_assets:not_#{type.to_s.pluralize}" do |tag|
-      tag.locals.assets = tag.locals.assets.send("not_#{type.to_s.pluralize}".intern)
-      tag.expand
-    end
-    tag "tagged_assets:not_#{type.to_s.pluralize}:each" do |tag|
-      result = []
-      tag.locals.assets.each do |asset|
-        tag.locals.asset = asset
-        result << tag.expand
-      end 
-      result
-    end
-  end
-
-  # displaying sets of assets 
-  # all of these tags require that a set of assets has been designated.
+  # page-candy: displaying sets of assets in a stylable way
+  # all of these tags require that a set of assets is in context.
   
   desc %{ 
     Presents a standard marginal gallery block suitable for turning unobtrusively into a rollover or lightbox gallery. 
@@ -230,7 +266,7 @@ module AssetGalleryTags
     options = tag.attr.dup.symbolize_keys
     raise TagError, "asset collection must be available for assets:minigallery tag" unless tag.locals.assets or tag.locals.page or tag.attr[:tags]
     if options[:tags] && tags = Tag.from_list(options[:tags])
-      tag.locals.assets = Asset.images.from_tags(tags)
+      tag.locals.assets = Asset.images.from_all_tags(tags)
     else
       tag.locals.assets = tag.locals.page.assets
     end
@@ -285,7 +321,7 @@ module AssetGalleryTags
     options = tag.attr.dup.symbolize_keys
 
     if options[:tags] && tags = Tag.from_list(options[:tags])
-      tag.locals.assets = Asset.images.from_tags(tags)
+      tag.locals.assets = Asset.images.from_all_tags(tags)
     else
       tag.locals.assets = Asset.images
     end
@@ -341,18 +377,15 @@ module AssetGalleryTags
     result
   end        
 
+
   desc %{ 
     Presents a tag cloud built from the current set of assets. If none is defined, we show a cloud for the whole asset set.
     
-    Options and enclosed markup are passed through to r:tag_cloud.
+    See r:tags:cloud for formatting and selection parameters.
     
     *Usage:*
     <pre><code><r:assets:tag_cloud /></code></pre>
-    
-    This will only show tags that have been attached to assets. If you want to show a tag cloud for the whole site, use this instead: 
-    
-    <pre><code><r:tag_cloud all='true' /></code></pre>
-    
+        
     which will include asset-tagging (and pages and any other kind of tagged item) in its calculation of prominence.
   }
   tag 'assets:tag_cloud' do |tag|
@@ -372,22 +405,22 @@ module AssetGalleryTags
     end
   end
 
-  private
-      
-    def _assets_for_tags(taglist, strict=false)
-      tags = Tag.from_list(taglist)
-      assets = Asset.from_tags(tags).find(:all)     # without the find, if we call .empty? it tries to count() and fails because of the count already in the named_scope
-      assets.select!{ |a| a.match_count.to_i == tags.length} if strict and not assets.empty?
-      assets
-    end
+private
     
-    def _subset_assets!(tag)
-      if tag.locals.assets
-        asset_type = tag.attr['type']
-        if asset_type && Asset.known_types.include?(asset_type)
-          tag.locals.assets = tag.locals.assets.send(asset_type.pluralize.intern)
-        end
+  def _assets_for_tags(taglist, strict=false)
+    tags = Tag.from_list(taglist)
+    assets = Asset.from_all_tags(tags).find(:all)     # without the find, if we call .empty? it tries to count() and fails because of the count already in the named_scope
+    assets.select!{ |a| a.match_count.to_i == tags.length} if strict and not assets.empty?
+    assets
+  end
+  
+  def _subset_assets!(tag)
+    if tag.locals.assets
+      asset_type = tag.attr['type']
+      if asset_type && Asset.known_types.include?(asset_type)
+        tag.locals.assets = tag.locals.assets.send(asset_type.pluralize.intern)
       end
     end
+  end
   
 end

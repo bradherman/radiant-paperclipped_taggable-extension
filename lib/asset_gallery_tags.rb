@@ -180,9 +180,10 @@ module AssetGalleryTags
     This is a general purpose asset lister. It wouldn't normally be accessed directly but a lot of other tags make use of it.
   }
   tag 'asset_list' do |tag|
+    raise TagError, "no assets for asset_list" unless tag.locals.assets
     result = []
-    tag.locals.assets.each do |page|
-      tag.locals.asset = page
+    tag.locals.assets.each do |asset|
+      tag.locals.asset = asset
       result << tag.expand
     end 
     result

@@ -5,6 +5,38 @@ module AssetGalleryTags
 
   # mostly we're just extending TaggableTags with Asset versions of the Page tags
 
+  ################# attached-asset helpers (these were in paperclipped for a while but were removed, for some reason)
+
+  Asset.known_types.each do |type|
+    desc %{
+      Loops through all the attached assets of type #{type}.
+
+      *Usage:* 
+      <pre><code><r:attachments:#{type.to_s.pluralize}>...</r:assets:#{type.to_s.pluralize}></code></pre>
+    }
+    tag "attachments:#{type.to_s.pluralize}" do |tag|
+      raise TagError, "page must be defined for attachments tags" unless tag.locals.page
+      tag.locals.assets = tag.locals.page.assets.send(type.to_s.pluralize.intern)
+      tag.expand
+    end
+    tag "attachments:#{type.to_s.pluralize}:each" do |tag|
+      tag.render('asset_list', tag.attr.dup, &tag.block)
+    end
+
+    desc %{
+      Displays the first attached asset of type #{type}.
+
+      *Usage:* 
+      <pre><code><r:attachments:#{type.to_s.pluralize}>...</r:assets:#{type.to_s.pluralize}></code></pre>
+    }
+    tag "attachments:first_#{type.to_s}" do |tag|
+      if tag.locals.assets.any?
+        tag.locals.asset = tag.locals.assets.first
+        tag.expand
+      end
+    end
+  end
+
   ################# assets from many tags
 
   %W{all top page requested coincident}.each do |these|
@@ -46,23 +78,8 @@ module AssetGalleryTags
     end
     
     ################# then we disappear up the various asset types and the many conditional possibilities
-                    # incidentally also creating assets tags like r:assets:images:each
     
     Asset.known_types.each do |type|
-      
-      desc %{
-        Loops through all assets of type #{type}.
-
-        *Usage:* 
-        <pre><code><r:assets:#{type.to_s.pluralize}>...</r:assets:#{type.to_s.pluralize}></code></pre>
-      }
-      tag "assets:#{type.to_s.pluralize}" do |tag|
-        tag.locals.assets = Asset.send(type.to_s.pluralize.intern)
-        tag.expand
-      end
-      tag "assets:#{type.to_s.pluralize}:each" do |tag|
-        tag.render('asset_list', tag.attr.dup, &tag.block)      # doesn't look right, but tags:assets:each is just an asset lister: it doesn't care where they come from
-      end
       
       desc %{
         Loops through all assets of type #{type} associated with the set of #{these} tags

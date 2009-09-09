@@ -4,44 +4,11 @@ module AssetGalleryTags
   class TagError < StandardError; end
 
   # mostly we're just extending TaggableTags with Asset versions of the Page tags
-
-  ################# attached-asset helpers (these were in paperclipped for a while but were removed, for some reason)
-
-  Asset.known_types.each do |type|
-    desc %{
-      Loops through all the attached assets of type #{type}.
-
-      *Usage:* 
-      <pre><code><r:attachments:#{type.to_s.pluralize}>...</r:assets:#{type.to_s.pluralize}></code></pre>
-    }
-    tag "attachments:#{type.to_s.pluralize}" do |tag|
-      raise TagError, "page must be defined for attachments tags" unless tag.locals.page
-      tag.locals.assets = tag.locals.page.assets.send(type.to_s.pluralize.intern)
-      tag.expand
-    end
-    tag "attachments:#{type.to_s.pluralize}:each" do |tag|
-      tag.render('asset_list', tag.attr.dup, &tag.block)
-    end
-
-    desc %{
-      Displays the first attached asset of type #{type}.
-
-      *Usage:* 
-      <pre><code><r:attachments:#{type.to_s.pluralize}>...</r:assets:#{type.to_s.pluralize}></code></pre>
-    }
-    tag "attachments:first_#{type.to_s}" do |tag|
-      if tag.locals.assets.any?
-        tag.locals.asset = tag.locals.assets.first
-        tag.expand
-      end
-    end
-  end
-
-  ################# assets from many tags
+  # assets from many tags
 
   %W{all top page requested coincident}.each do |these|
 
-    ################# assety suffixes pass on to the relevant tags:assets method. Again, only requested_tags is likely to be much used here.
+    # assety suffixes pass on to the relevant tags:assets method. Again, only requested_tags is likely to be much used here.
 
     desc %{
       Lists all the assets tagged with any of the set of #{these} tags, in descending order of overlap.
@@ -77,7 +44,7 @@ module AssetGalleryTags
       tag.render('tags:unless_assets', tag.attr.dup, &tag.block)
     end
     
-    ################# then we disappear up the various asset types and the many conditional possibilities
+    # then we disappear up the various asset types and the many conditional possibilities
     
     Asset.known_types.each do |type|
       
@@ -208,7 +175,7 @@ module AssetGalleryTags
   
   
   
-  ################# tags from one asset
+  # tags from one asset
   
   desc %{
     Cycles through all tags attached to present asset.
@@ -243,7 +210,7 @@ module AssetGalleryTags
 
 
 
-  ################# assets from one tag
+  # assets from one tag
 
   desc %{
     Loops through the assets to which the present tag has been applied

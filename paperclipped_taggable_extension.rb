@@ -5,12 +5,13 @@ class PaperclippedTaggableExtension < Radiant::Extension
   
   extension_config do |config|
     config.extension 'paperclipped'
+    config.extension 'taggable'
   end
   
   def activate
-    Asset.send :is_taggable                                              # make pages taggable 
-    Asset.send :include, TaggableAsset                                   # add a keywords method for compatibility with pages
-    Page.send :include, AssetGalleryTags                                 # and a load of new page tags for displaying galleries and lists of assets
+    Asset.send :is_taggable                    # make pages taggable 
+    Asset.send :include, TaggableAsset         # add a keywords method for compatibility with pages
+    Page.send :include, AssetGalleryTags       # and a load of new page tags for displaying galleries and lists of assets
   end
   
 end

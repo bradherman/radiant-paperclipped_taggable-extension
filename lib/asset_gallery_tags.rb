@@ -355,7 +355,7 @@ module AssetGalleryTags
     
     *Usage:*
     <pre><code><r:assets:tag_cloud /></code></pre>
-        
+    
     which will include asset-tagging (and pages and any other kind of tagged item) in its calculation of prominence.
   }
   tag 'assets:tag_cloud' do |tag|

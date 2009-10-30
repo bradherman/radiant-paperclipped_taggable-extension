@@ -90,7 +90,7 @@ var ImagePreview = new Class({
   preview: function () {
     if (this.is_ready) {
       this.cancelDown();
-      this.shower.front();
+      this.shower.bringForward();
       this.shower.addEvent('mouseout', this.hideSoon.bind(this));
       this.shower.show();
       this.upper().start(this.previewing);

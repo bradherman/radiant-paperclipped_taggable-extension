@@ -6,6 +6,61 @@ module AssetGalleryTags
   # mostly we're just extending TaggableTags with Asset versions of the Page tags
   # assets from many tags
 
+  Asset.known_types.each do |type|
+    desc %{
+      Gathers all the tags attached to #{type.to_s.pluralize}.
+      Can be used to make a cloud or chooser in the usual way.
+
+      *Usage:* 
+      <pre><code><r:#{type}_tags><r:tags:cloud /></r:#{type}_tags></code></pre>
+    }
+    tag "#{type}_tags" do |tag|
+      tag.locals.tags = Tag.attached_to(Asset.not_furniture.send(type.to_s.pluralize.intern)).most_popular
+      tag.expand
+    end
+
+    desc %{
+      Loops through all the #{type} tags.
+
+      *Usage:* 
+      <pre><code><r:#{type}_tags:each>...</r:#{type}_tags:each></code></pre>
+    }
+    tag "#{type}_tags:each" do |tag|
+      tag.render('tags:each', tag.attr.dup)
+    end
+
+    desc %{
+      Returns a list of all the #{type} tags.
+
+      *Usage:* 
+      <pre><code><r:#{type}_tags:list /></code></pre>
+    }
+    tag "#{type}_tags:list" do |tag|
+      tag.render('tags:list', tag.attr.dup)
+    end
+
+    desc %{
+      Returns a cloud of all the #{type} tags.
+
+      *Usage:* 
+      <pre><code><r:#{type}_tags:cloud /></code></pre>
+    }
+    tag "#{type}_tags:cloud" do |tag|
+      tag.render('tags:cloud', tag.attr.dup)
+    end
+
+    desc %{
+      Summarises in a sentence the list of #{type} tags.
+      
+      *Usage:* 
+      <pre><code><r:#{type}_tags:summary /></code></pre>
+    }    
+    tag "#{type}_tags:summary" do |tag|
+      tag.render('tags:summary', tag.attr.dup)
+    end
+  end
+
+
   %W{all top page requested coincident}.each do |these|
 
     # assety suffixes pass on to the relevant tags:assets method. Again, only requested_tags is likely to be much used here.
@@ -17,7 +72,7 @@ module AssetGalleryTags
       <pre><code><r:#{these}_tags:assets:each>...</r:#{these}_tags:assets:each></code></pre>
     }
     tag "#{these}_tags:assets" do |tag|
-      tag.locals.assets = Asset.from_all_tags(tag.locals.tags)
+      tag.locals.assets = _asset_finder(tag)
       tag.expand
     end
     tag "#{these}_tags:assets:each" do |tag|
@@ -55,7 +110,7 @@ module AssetGalleryTags
         <pre><code><r:#{these}_tags:#{type.to_s.pluralize}>...</r:#{these}_tags:#{type.to_s.pluralize}></code></pre>
       }
       tag "#{these}_tags:#{type.to_s.pluralize}" do |tag|
-        tag.locals.assets = Asset.from_all_tags(tag.locals.tags).send("#{type.to_s.pluralize}".intern)
+        tag.locals.assets = _asset_finder(tag).send("#{type.to_s.pluralize}".intern)
         tag.expand
       end
       tag "#{these}_tags:#{type.to_s.pluralize}:each" do |tag|
@@ -69,7 +124,7 @@ module AssetGalleryTags
         <pre><code><r:#{these}_tags:non_#{type.to_s.pluralize}>...</r:#{these}_tags:non_#{type.to_s.pluralize}></code></pre>
       }
       tag "#{these}_tags:non_#{type.to_s.pluralize}" do |tag|
-        tag.locals.assets = Asset.from_all_tags(tag.locals.tags).send("not_#{type.to_s.pluralize}".intern)
+        tag.locals.assets = _asset_finder(tag).send("not_#{type.to_s.pluralize}".intern)
         tag.expand
       end
       tag "#{these}_tags:non_#{type.to_s.pluralize}:each" do |tag|
@@ -83,7 +138,7 @@ module AssetGalleryTags
         <pre><code><r:#{these}_tags:if_#{type.to_s.pluralize}>...</r:#{these}_tags:if_#{type.to_s.pluralize}></code></pre>
       }
       tag "#{these}_tags:if_#{type.to_s.pluralize}" do |tag|
-        assets = Asset.from_all_tags(tag.locals.tags).send("#{type.to_s.pluralize}".intern)
+        assets = _asset_finder(tag).send("#{type.to_s.pluralize}".intern)
         tag.expand if assets.any?
       end
 
@@ -94,7 +149,7 @@ module AssetGalleryTags
         <pre><code><r:#{these}_tags:unless_#{type.to_s.pluralize}>...</r:#{these}_tags:unless_#{type.to_s.pluralize}></code></pre>
       }
       tag "#{these}_tags:unless_#{type.to_s.pluralize}" do |tag|
-        assets = Asset.from_all_tags(tag.locals.tags).send("#{type.to_s.pluralize}".intern)
+        assets = _asset_finder(tag).send("#{type.to_s.pluralize}".intern)
         tag.expand unless assets.any?
       end
 
@@ -105,7 +160,7 @@ module AssetGalleryTags
         <pre><code><r:#{these}_tags:if_non_#{type.to_s.pluralize}>...</r:#{these}_tags:if_non_#{type.to_s.pluralize}></code></pre>
       }
       tag "#{these}_tags:if_non_#{type.to_s.pluralize}" do |tag|
-        assets = Asset.from_all_tags(tag.locals.tags).send("not_#{type.to_s.pluralize}".intern)
+        assets = _asset_finder(tag).send("not_#{type.to_s.pluralize}".intern)
         tag.expand if assets.any?
       end
 
@@ -116,7 +171,7 @@ module AssetGalleryTags
         <pre><code><r:#{these}_tags:unless_non_#{type.to_s.pluralize}>...</r:#{these}_tags:unless_non_#{type.to_s.pluralize}></code></pre>
       }
       tag "#{these}_tags:unless_non_#{type.to_s.pluralize}" do |tag|
-        assets = Asset.from_all_tags(tag.locals.tags).send("not_#{type.to_s.pluralize}".intern)
+        assets = _asset_finder(tag).send("not_#{type.to_s.pluralize}".intern)
         tag.expand unless assets.any?
       end
     end
@@ -129,7 +184,7 @@ module AssetGalleryTags
     <pre><code><r:tags:assets:each>...</r:tags:assets:each></code></pre>
   }
   tag 'tags:assets' do |tag|
-    tag.locals.assets ||= Asset.from_all_tags(tag.locals.tags)
+    tag.locals.assets ||= _asset_finder(tag)
     tag.expand
   end
   tag 'tags:assets:each' do |tag|
@@ -143,7 +198,7 @@ module AssetGalleryTags
     <pre><code><r:tags:if_assets>...</r:tags:if_assets></code></pre>
   }
   tag "tags:if_assets" do |tag|
-    tag.locals.assets = Asset.from_all_tags(tag.locals.tags)
+    tag.locals.assets = _assets_for_tags(tag.locals.tags)
     tag.expand if tag.locals.assets.any?
   end
 
@@ -154,7 +209,7 @@ module AssetGalleryTags
     <pre><code><r:tags:unless_assets>...</r:tags:unless_assets></code></pre>
   }
   tag "tags:unless_assets" do |tag|
-    tag.locals.assets = Asset.from_all_tags(tag.locals.tags)
+    tag.locals.assets = _assets_for_tags(tag.locals.tags)
     tag.expand unless tag.locals.assets.any?
   end
   
@@ -376,10 +431,18 @@ module AssetGalleryTags
   end
 
 private
-    
+  
+  def _asset_finder(tag)
+    if (tag.locals.tags)
+      Asset.from_all_tags(tag.locals.tags).not_furniture
+    else
+      Asset.not_furniture
+    end
+  end
+  
   def _assets_for_tags(taglist, strict=false)
     tags = Tag.from_list(taglist)
-    assets = Asset.from_all_tags(tags).find(:all)     # without the find, if we call .empty? it tries to count() and fails because of the count already in the named_scope
+    assets = Asset.from_all_tags(taglist).non_furniture.find(:all)     # without the find, if we call .empty? it tries to count() and fails because of the count already in the named_scope
     assets.select!{ |a| a.match_count.to_i == tags.length} if strict and not assets.empty?
     assets
   end

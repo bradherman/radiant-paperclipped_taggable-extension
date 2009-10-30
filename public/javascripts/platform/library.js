@@ -3,146 +3,208 @@ var ImageList = new Class({
     this.container = element;
     this.contents = [];
     this.container.getElements('li').each(function (li) { this.contents.push(new ImageListItem(li, this)); }, this);
-    this.up_items = [];
   },
-  show: function (item) {
-    this.up_items.push(item);
-    this.hideOthers(item);
-    item.show();
+  itemAfter: function (item) {
+    var pos = this.contents.indexOf(item);
+    after = (pos == -1 || pos == this.contents.length-1) ? this.contents[0] : this.contents[pos+1];
+    return after;
   },
-  hideSoon: function (item) {
-    item.hideSoon();
-  },
-  hide: function (item) {
-    item.hide();
-  },
-  hideOthers: function (exception) {
-    this.up_items.each(function (item) {
-      if (item != exception) this.hideSoon(item);
-    }, this);
+  itemBefore: function (item) {
+    var pos = this.contents.indexOf(item);
+    var before = null;
+    before = (pos == -1 || pos == 0) ? this.contents[this.contents.length-1] : this.contents[pos-1];
+    return before;
   }
 });
 
 var ImageListItem = new Class({
   initialize: function (element, list) { 
+    this.ready = false;
     this.list = list;
     this.container = element;
-    this.container.addEvent('mouseover', this.list.show.bind(this.list, this));
-    this.preview = new ImagePreview(this.container.getElement('img'));
+    this.image = this.container.getElement('img');
+    this.link = this.container.getElement('a');
+    this.title = this.image.get('alt');
+    this.caption = this.image.get('title');
+    this.src = this.image.get('src');
+    this.asset_id = this.image.get('id').replace('asset_', '');
+    this.zoom = new Asset.image(this.link.get('href'), {onload: this.makeReady.bind(this)});
+    this.image.set('title', null);
+    this.captioner = null;
+    this.zoomer = null;
+    this.container.addEvent('mouseover', this.showCaption.bindWithEvent(this));
+    this.container.addEvent('mouseout', this.hideCaption.bindWithEvent(this));
+    this.image.fade(0.7);
   },
-  show: function () {
-    this.preview.preview();
+  showCaption: function (e) {
+    unevent(e);
+    this.getCaptioner().show();
   },
-  hide: function (argument) {
-    this.preview.hide();
+  hideCaption: function (e) {
+    unevent(e);
+    captioner.hideSoon();
   },
-  hideSoon: function (argument) {
-    this.preview.hideSoon();
+  getCaptioner: function () {
+    return captioner.adopt(this);
   },
-  lazy_load_preview: function () {
-    if (!this.preview) this.preview = new ImagePreview(this.container.getElement('img'));
-    return this.preview;
-  }
-});
-
-var ImagePreview = new Class({
-  initialize: function (img) {
-    this.img = img;
-    this.img.fade(0.4);
-
-    this.url = img.get('src').replace('_small', '_large');
-    this.shower = new Asset.image(this.url, {title: this.img.get('title'), onload: this.makeReady.bind(this)});
-
-    this.at = img.getCoordinates();
-    this.hiding = {
-      'top' : this.at.top - 4,
-      'left' : this.at.left - 4,
-      'width' : this.at.width,
-      'height' : this.at.height,
-      'opacity' : 0
-    };
-    
-    this.previewing = {};
-    this.showing = {};
-    
-    this.upfx = this.downfx = null;
-    this.delay = null;
-    this.is_ready = false;
-
+  showZoom: function (e) {
+    unevent(e);
+    this.getZoomer().show();
+  },
+  getZoomer: function () {
+    return zoomer.adopt(this);
   },
   makeReady: function () {
-    var w = this.shower.get('width');
-    var h = this.shower.get('height');
-    this.shower.addClass('preview');
-    this.shower.inject(document.body);
-    this.shower.setStyles(this.hiding);
-    this.shower.hide();
-    this.previewing = {
-      'top' : Math.floor((this.at.top + this.at.height/2) - (h/2) - 4),
-      'left' : Math.floor((this.at.left + this.at.width/2) - (w/2) - 4),
-      'width' : w,
-      'height' : h,
-      'opacity' : 1
+    this.image.fade(1);
+    this.link.addEvent('click', this.showZoom.bindWithEvent(this));
+    this.ready = true;
+  },
+  nextItem: function () {
+    return this.list.itemAfter(this);
+  },
+  previousItem: function () {
+    return this.list.itemBefore(this);
+  }
+});
+
+var Captioner = new Class({
+  Extends: Bouncer,
+  initialize: function (item) {
+    this.item = item;
+    this.parent(new Element('div', {'class' : 'captioner'}));
+    this.title = new Element('h4').inject(this.container);
+    this.caption = new Element('p').inject(this.container);
+    this.container.inject(document.body);
+    this.delay_before_hiding = 250;
+  },
+  setShownAndHiddenStates: function () {
+    this.when_hiding = {'opacity' : 0};
+    this.when_showing = {'opacity' : 0.95};
+  },
+  adopt: function (item) {
+    this.item = item;
+    return this;
+  },
+  display: function (item) {
+    this.adopt(item);
+    this.show();
+  },
+  setTriggers: function () {
+    this.container.addEvent('mouseenter', this.hideSoon.bindWithEvent(this));
+    this.container.addEvent('click', this.hide.bindWithEvent(this));
+  },
+  beforeShowing: function () {
+    this.container.set('tween', {'duration' : 'short'});
+    this.place();
+    this.fill();
+  },
+  place: function () {
+    var itemat = this.item.image.getCoordinates();
+    this.container.setStyles({
+      left: itemat['left'],
+      top: itemat['top'] + itemat['height'] + 6,
+      width: itemat['width'],
+      height: itemat['height'] + 4
+    });
+  },
+  fill: function () {
+    this.title.set('text', this.item.title);
+    this.caption.set('text', this.item.caption);
+  }
+});
+
+var Zoomer = new Class({
+  Extends: Bouncer,
+  setTriggers: function () { this.container.addEvent('click', this.hide.bindWithEvent(this)); },
+  initialize: function (item) {
+    this.parent(new Element('div', {'class' : 'zoomer'}));
+    this.image = new Element('img', {'class' : 'zoomed'}).inject(this.container);
+    this.caption_holder = new Element('div', {'class' : 'caption'}).inject(this.container);
+    this.title = new Element('h4').inject(this.caption_holder);
+    this.caption = new Element('p').inject(this.caption_holder);
+    this.link_holder = new Element('div', {'class': 'link_holder'}).inject(this.container);
+    this.lefter = new Element('a', {'class': 'left', 'href': '#', 'title': 'previous'}).inject(this.link_holder);
+    this.downer = new Element('a', {'class': 'download', 'href': '#', 'title': 'download'}).inject(this.link_holder);
+    this.righter = new Element('a', {'class': 'right', 'href': '#', 'title': 'next'}).inject(this.link_holder);
+    this.lefter.addEvent('click', this.showPrevious.bindWithEvent(this)); 
+    this.righter.addEvent('click', this.showNext.bindWithEvent(this)); 
+    this.downer.addEvent('click', this.download.bindWithEvent(this)); 
+    this.container.inject(document.body);
+  },
+  setShownAndHiddenStates: function () { }, // place() is called before showing
+  transitionIn: function () { return Fx.Transitions.Back.easeOut; },
+  durationIn: function () { return 'normal'; },
+  display: function (item) {
+    this.adopt(item);
+    new Fx.Tween(this.image, {duration: 'short', onComplete: this.reshow.bind(this)}).start('opacity', 0);
+  },
+  adopt: function (item) {
+    this.item = item;
+    return this;
+  },
+  reshow: function (argument) {
+    this.show();
+  },
+  beforeShowing: function () {
+    this.container.set('morph', {'duration' : 'long'});
+    this.place();
+    this.fill();
+    this.container.bringForward();
+    this.visible = true;
+  },
+  place: function () {
+    var itemat = this.item.image.getCoordinates();
+    this.when_hiding = {
+      left: itemat.left - 8,
+      top: itemat.top - 8,
+      width: itemat.width,
+      height: itemat.height,
+      opacity: 0
     };
-    this.img.fade('in');
-    this.is_ready = true;
+    if (!this.visible) this.container.setStyles(this.when_hiding);
+    var space = window.getSize();
+    var h = parseInt(this.item.zoom.get('height'), 10);
+    var w = parseInt(this.item.zoom.get('width'), 10);
+    this.when_showing = {
+      left: Math.floor((space.x - w) / 2),
+      top: window.getScroll().y + Math.floor((space.y - h) / 2),
+      width: w,
+      height: h,
+      opacity: 1
+    };
   },
-  preview: function () {
-    if (this.is_ready) {
-      this.cancelDown();
-      this.shower.bringForward();
-      this.shower.addEvent('mouseout', this.hideSoon.bind(this));
-      this.shower.show();
-      this.upper().start(this.previewing);
-    }
+  fill: function () {
+    this.image.set('src', this.item.zoom.get('src'));
+    this.image.fade('in');
+    this.title.set('text', this.item.title);
+    this.caption.set('text', this.item.caption);
   },
-  hide: function () {
-    this.cancelUp();
-    this.downer().start(this.hiding);
-    this.shower.addEvent('mouseover', this.preview.bind(this));
-  },
-  hideSoon: function () {
-    this.delay = this.hide.bind(this).delay(200);
-  },
-  reallyHide: function () {
-    this.shower.hide();
-  },
-  upper: function () {
-    if (!this.upfx) this.upfx = new Fx.Morph(this.shower, {duration: 'short', transition: Fx.Transitions.Quad.easeOut});
-    return this.upfx;
-  },
-  cancelUp: function () {
-    if (this.upfx) this.upfx.cancel();
-  },
-  downer: function () {
-    if (!this.downfx) this.downfx = new Fx.Morph(this.shower, {duration: 'long', onComplete: this.reallyHide.bind(this)});
-    return this.downfx;
-  },
-  cancelDown: function () {
-    if (this.delay) $clear(this.delay);
-    if (this.downfx) this.downfx.cancel();
-  }
-});
+  beforeHiding: function () {
 
-var top_z = null;
-var topZ = function () {
-  if (top_z) return top_z;
-  $$('*').each(function (element) {
-    z = parseInt(element.getStyle('z-index'), 10);
-    if (z > top_z) top_z = z;
-  });
-  return top_z;
-};
-
-Element.implement({
-  front: function () {
-    top_z = topZ() + 1;
-    this.setStyle('z-index', top_z);
+  },
+  afterShowing: function () {
+    this.container.tween('height', this.when_showing.height + this.caption_holder.getHeight() + 8);
+  },
+  showPrevious: function (e) {
+    unevent(e);
+    this.display(this.item.previousItem());
+  },
+  showNext: function (e) {
+    unevent(e);
+    this.display(this.item.nextItem());
+  },
+  download: function (e) {
+    unevent(e);
+    window.location.href = "/assets/" + this.item.asset_id;
   }
 });
 
 
+var zoomer = null;
+var captioner = null;
 
 activations.push(function (scope) {
+  zoomer = new Zoomer();
+  captioner = new Captioner();
   scope.getElements('ul.imagelist').each( function (ul) { new ImageList(ul); }); 
 });

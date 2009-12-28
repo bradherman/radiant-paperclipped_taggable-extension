@@ -1,5 +1,9 @@
 # Paperclipped Taggable
 
+This might still work but it has been replaced with the [library extension](http://github.com/spanner/radiant-library-extension), which clarifies much that is confused below and includes much better faceted gallery/library retrieval tools.
+
+...
+
 On first encounter this is probably just a quick way to get reasonably shiny image galleries on your site, but its real job is to support a proper image, media and document library. The galleries are just a way of playing back the library, and you can also do things like putting related downloads on a page or retrieving documents by tag-overlap.
 
 ## How

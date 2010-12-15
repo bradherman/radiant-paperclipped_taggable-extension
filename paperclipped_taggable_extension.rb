@@ -9,9 +9,10 @@ class PaperclippedTaggableExtension < Radiant::Extension
   end
   
   def activate
-    Asset.send :is_taggable                    # make pages taggable 
-    Asset.send :include, TaggableAsset         # add a keywords method for compatibility with pages
-    Page.send :include, AssetGalleryTags       # and a load of new page tags for displaying galleries and lists of assets
+    ActiveRecord::Base.send :include, TaggableModel # provide is_taggable for everything but don't call it for anything
+    Asset.send :is_taggable                         # make assets taggable 
+    Asset.send :include, TaggableAsset              # add a keywords method for compatibility with pages
+    Page.send :include, AssetGalleryTags            # and a load of new page tags for displaying galleries and lists of assets
   end
   
 end
